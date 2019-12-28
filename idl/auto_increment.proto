@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+service AutoIncrement {
+    rpc GetSingle (GetSingleRequest) returns (GetSingleResponse) {
+        option (google.api.http) = {
+            post: "/auto-increment/single",
+            body: "*"
+        };
+    }
+
+    rpc GetMultiple (GetMultipleRequest) returns (GetMultipleResponse) {
+        option (google.api.http) = {
+            post: "/auto-increment/multiple",
+            body: "*"
+        };
+    }
+}
+
+message GetSingleRequest {
+    string key = 1;
+}
+
+message GetSingleResponse {
+    string key = 1;
+    uint64 value = 2;
+}
+
+message GetMultipleRequest {
+    string key = 1;
+    uint64 quantity = 2;
+}
+
+message GetMultipleResponse {
+    string key = 1;
+    repeated uint64 value = 2;
+}
