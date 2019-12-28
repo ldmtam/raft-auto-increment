@@ -1,6 +1,7 @@
 package leveldb
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -79,6 +80,40 @@ func (d *autoIncrementDB) GetMultiple(key string, quantity uint64) ([]uint64, er
 	}
 
 	return result, nil
+}
+
+func (d *autoIncrementDB) GetLast(key string) (uint64, error) {
+	isExist, err := d.db.Has([]byte(key), nil)
+	if err != nil {
+		return 0, err
+	}
+
+	if !isExist {
+		return 0, nil
+	}
+
+	valueBytes, err := d.db.Get([]byte(key), nil)
+	if err != nil {
+		return 0, err
+	}
+
+	return database.ByteToUint64(valueBytes), nil
+}
+
+func (d *autoIncrementDB) Set(key string, value uint64) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	isExist, err := d.db.Has([]byte(key), nil)
+	if err != nil {
+		return err
+	}
+
+	if !isExist {
+		return errors.New("key not found")
+	}
+
+	return d.db.Put([]byte(key), database.Uint64ToByte(value), nil)
 }
 
 func (d *autoIncrementDB) Close() error {
