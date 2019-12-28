@@ -34,5 +34,5 @@ message GetMultipleRequest {
 
 message GetMultipleResponse {
     string key = 1;
-    repeated uint64 value = 2;
+    repeated uint64 values = 2;
 }

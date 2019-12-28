@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ldmtam/raft-auto-increment/auto_increment/database/leveldb"
+
+	"github.com/ldmtam/raft-auto-increment/auto_increment/database"
+
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
 	"google.golang.org/grpc"
@@ -22,6 +26,8 @@ type AutoIncrement interface {
 type autoIncrement struct {
 	grpcServer *grpc.Server
 	httpServer *http.Server
+
+	db database.AutoIncrement
 
 	config *Config
 }
@@ -57,6 +63,11 @@ func (s *autoIncrement) Start() error {
 		Handler: mux,
 	}
 
+	s.db, err = leveldb.New(s.config.DataDir)
+	if err != nil {
+		return err
+	}
+
 	go s.grpcServer.Serve(grpcListener)
 	go s.httpServer.Serve(httpListener)
 
@@ -66,6 +77,7 @@ func (s *autoIncrement) Start() error {
 func (s *autoIncrement) Stop() {
 	s.grpcServer.GracefulStop()
 	s.httpGracefulShutdown()
+	s.db.Close()
 }
 
 func (s *autoIncrement) httpGracefulShutdown() {

@@ -16,4 +16,4 @@ genpb:
 		idl/auto_increment.proto
 
 run-local:
-	go run main.go --http-addr localhost:3000 --grpc-addr localhost:4000
+	go run main.go --http-addr localhost:3000 --grpc-addr localhost:4000 --data-dir ./mock-data
