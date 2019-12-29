@@ -1,43 +1,59 @@
 package leveldb
 
 import (
-	"errors"
 	"fmt"
+	"path/filepath"
 	"sync"
+
+	"github.com/spaolacci/murmur3"
 
 	"github.com/ldmtam/raft-auto-increment/auto_increment/database"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-type autoIncrementDB struct {
+const (
+	SHARD_COUNT = 32
+)
+
+type autoIncrementShard struct {
 	db *leveldb.DB
-	mu sync.Mutex
+	mu sync.RWMutex
+}
+
+type autoIncrementDB struct {
+	shardedDB []*autoIncrementShard
 }
 
 // New returns new instance of auto-increment leveldb
 func New(path string) (database.AutoIncrement, error) {
-	db, err := leveldb.OpenFile(path, nil)
-	if err != nil {
-		return nil, err
+	shardedDB := make([]*autoIncrementShard, SHARD_COUNT)
+	for i := 0; i < SHARD_COUNT; i++ {
+		db, err := leveldb.OpenFile(filepath.Join(path, fmt.Sprintf("shard-%v", i)), nil)
+		if err != nil {
+			return nil, err
+		}
+		shardedDB[i] = &autoIncrementShard{db: db}
 	}
-
-	return &autoIncrementDB{
-		db: db,
-	}, nil
+	return &autoIncrementDB{shardedDB: shardedDB}, nil
 }
 
 func (d *autoIncrementDB) GetSingle(key string) (uint64, error) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	shard, err := d.getShard(key)
+	if err != nil {
+		return 0, err
+	}
 
-	isExist, err := d.db.Has([]byte(key), nil)
+	shard.mu.Lock()
+	defer shard.mu.Unlock()
+
+	isExist, err := shard.db.Has([]byte(key), nil)
 	if err != nil {
 		return 0, err
 	}
 
 	var value uint64
 	if isExist {
-		valueBytes, err := d.db.Get([]byte(key), nil)
+		valueBytes, err := shard.db.Get([]byte(key), nil)
 		if err != nil {
 			fmt.Println(err)
 			return 0, err
@@ -45,7 +61,7 @@ func (d *autoIncrementDB) GetSingle(key string) (uint64, error) {
 		value = database.ByteToUint64(valueBytes)
 	}
 
-	if err := d.db.Put([]byte(key), database.Uint64ToByte(value+1), nil); err != nil {
+	if err := shard.db.Put([]byte(key), database.Uint64ToByte(value+1), nil); err != nil {
 		return 0, err
 	}
 
@@ -53,17 +69,22 @@ func (d *autoIncrementDB) GetSingle(key string) (uint64, error) {
 }
 
 func (d *autoIncrementDB) GetMultiple(key string, quantity uint64) ([]uint64, error) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	shard, err := d.getShard(key)
+	if err != nil {
+		return nil, err
+	}
 
-	isExist, err := d.db.Has([]byte(key), nil)
+	shard.mu.Lock()
+	defer shard.mu.Unlock()
+
+	isExist, err := shard.db.Has([]byte(key), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var value uint64
 	if isExist {
-		valueBytes, err := d.db.Get([]byte(key), nil)
+		valueBytes, err := shard.db.Get([]byte(key), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +96,7 @@ func (d *autoIncrementDB) GetMultiple(key string, quantity uint64) ([]uint64, er
 		result = append(result, value+i)
 	}
 
-	if err := d.db.Put([]byte(key), database.Uint64ToByte(value+quantity), nil); err != nil {
+	if err := shard.db.Put([]byte(key), database.Uint64ToByte(value+quantity), nil); err != nil {
 		return nil, err
 	}
 
@@ -83,7 +104,15 @@ func (d *autoIncrementDB) GetMultiple(key string, quantity uint64) ([]uint64, er
 }
 
 func (d *autoIncrementDB) GetLast(key string) (uint64, error) {
-	isExist, err := d.db.Has([]byte(key), nil)
+	shard, err := d.getShard(key)
+	if err != nil {
+		return 0, err
+	}
+
+	shard.mu.RLock()
+	defer shard.mu.RUnlock()
+
+	isExist, err := shard.db.Has([]byte(key), nil)
 	if err != nil {
 		return 0, err
 	}
@@ -92,7 +121,7 @@ func (d *autoIncrementDB) GetLast(key string) (uint64, error) {
 		return 0, nil
 	}
 
-	valueBytes, err := d.db.Get([]byte(key), nil)
+	valueBytes, err := shard.db.Get([]byte(key), nil)
 	if err != nil {
 		return 0, err
 	}
@@ -100,22 +129,19 @@ func (d *autoIncrementDB) GetLast(key string) (uint64, error) {
 	return database.ByteToUint64(valueBytes), nil
 }
 
-func (d *autoIncrementDB) Set(key string, value uint64) error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	isExist, err := d.db.Has([]byte(key), nil)
-	if err != nil {
-		return err
+func (d *autoIncrementDB) Close() error {
+	for i := 0; i < SHARD_COUNT; i++ {
+		if err := d.shardedDB[i].db.Close(); err != nil {
+			return err
+		}
 	}
-
-	if !isExist {
-		return errors.New("key not found")
-	}
-
-	return d.db.Put([]byte(key), database.Uint64ToByte(value), nil)
+	return nil
 }
 
-func (d *autoIncrementDB) Close() error {
-	return d.db.Close()
+func (d *autoIncrementDB) getShard(key string) (*autoIncrementShard, error) {
+	h32 := murmur3.New32()
+	if _, err := h32.Write([]byte(key)); err != nil {
+		return nil, err
+	}
+	return d.shardedDB[uint(h32.Sum32())%uint(SHARD_COUNT)], nil
 }

@@ -45,3 +45,12 @@ func Test_GetMultiple(t *testing.T) {
 	assert.Len(t, result, 5)
 	fmt.Println(result)
 }
+
+func Test_GetLast(t *testing.T) {
+	value, err := testDB.GetSingle("key1")
+	assert.Nil(t, err)
+
+	last, err := testDB.GetLast("key1")
+	assert.Nil(t, err)
+	assert.EqualValues(t, value, last)
+}
