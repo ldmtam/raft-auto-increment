@@ -2,7 +2,7 @@ package auto_increment
 
 // Config represents the config struct for AutoIncrement service
 type Config struct {
-	NodeName  string
+	NodeID    string
 	RaftAddr  string
 	RaftDir   string
 	Bootstrap bool
@@ -11,3 +11,8 @@ type Config struct {
 	HttpAddr string
 	GrpcAddr string
 }
+
+const (
+	retainSnapshotCount = 2
+	logCacheCapacity    = 512
+)
