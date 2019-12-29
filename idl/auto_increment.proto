@@ -16,6 +16,12 @@ service AutoIncrement {
             body: "*"
         };
     }
+
+    rpc GetLast (GetLastRequest) returns (GetLastResponse) {
+        option (google.api.http) = {
+            get: "/auto-increment/last/{key}"
+        };
+    }
 }
 
 message GetSingleRequest {
@@ -35,4 +41,13 @@ message GetMultipleRequest {
 message GetMultipleResponse {
     string key = 1;
     repeated uint64 values = 2;
+}
+
+message GetLastRequest {
+    string key = 1;
+}
+
+message GetLastResponse {
+    string key = 1;
+    uint64 value = 2;
 }

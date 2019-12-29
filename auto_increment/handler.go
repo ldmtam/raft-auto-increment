@@ -23,3 +23,12 @@ func (s *autoIncrement) GetMultiple(ctx context.Context, req *pb.GetMultipleRequ
 
 	return &pb.GetMultipleResponse{Key: req.Key, Values: values}, nil
 }
+
+func (s *autoIncrement) GetLast(ctx context.Context, req *pb.GetLastRequest) (*pb.GetLastResponse, error) {
+	value, err := s.db.GetLast(req.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetLastResponse{Value: value}, nil
+}
