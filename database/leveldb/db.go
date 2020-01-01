@@ -7,7 +7,7 @@ import (
 
 	"github.com/spaolacci/murmur3"
 
-	"github.com/ldmtam/raft-auto-increment/auto_increment/database"
+	"github.com/ldmtam/raft-auto-increment/database"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

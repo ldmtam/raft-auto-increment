@@ -4,16 +4,11 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
-	raftboltdb "github.com/hashicorp/raft-boltdb"
+	"github.com/ldmtam/raft-auto-increment/store"
 
-	"github.com/hashicorp/raft"
-	"github.com/ldmtam/raft-auto-increment/auto_increment/database/leveldb"
-
-	"github.com/ldmtam/raft-auto-increment/auto_increment/database"
+	"github.com/ldmtam/raft-auto-increment/config"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
@@ -22,131 +17,85 @@ import (
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
 )
 
-// AutoIncrement represents the AutoIncrement service interface
-type AutoIncrement interface {
-	Start() error
-	Stop()
+// Store represents the store interface
+type Store interface {
+	// Join joins the node with given ID and address
+	Join(id, addr string) error
+
+	// GetSingle gets next auto-increment ID for particular key
+	GetSingle(key string) (uint64, error)
+
+	// GetMultiple gets number of `quantity` of auto-increment ID for particular key
+	GetMultiple(key string, quantity uint64) ([]uint64, error)
+
+	// GetLast gets the last inserted id for particular key. This API doesn't change database.
+	GetLast(key string) (uint64, error)
+
+	// Shutdown shutdowns the store
+	Shutdown() error
 }
 
-type autoIncrement struct {
+// AutoIncrement represents the AutoIncrement structure
+type AutoIncrement struct {
 	grpcServer *grpc.Server
 	httpServer *http.Server
 
-	db database.AutoIncrement
+	store Store
 
-	raft *raft.Raft
-
-	config *Config
+	config *config.Config
 }
 
 // New returns new instance of AutoIncrement interface
-func New(config *Config) AutoIncrement {
-	return &autoIncrement{
+func New(config *config.Config) (*AutoIncrement, error) {
+	ai := &AutoIncrement{
 		config: config,
 	}
-}
 
-func (s *autoIncrement) Start() error {
-	grpcListener, err := net.Listen("tcp", s.config.GrpcAddr)
+	store, err := store.New(config)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	ai.store = store
+
+	grpcListener, err := net.Listen("tcp", config.GRPCAddr)
+	if err != nil {
+		return nil, err
 	}
 
-	httpListener, err := net.Listen("tcp", s.config.HttpAddr)
+	httpListener, err := net.Listen("tcp", config.HTTPAddr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	s.grpcServer = grpc.NewServer()
-	pb.RegisterAutoIncrementServer(s.grpcServer, s)
+	ai.grpcServer = grpc.NewServer()
+	pb.RegisterAutoIncrementServer(ai.grpcServer, ai)
 
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, s.config.GrpcAddr, opts); err != nil {
-		return err
+	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, ai.config.GRPCAddr, opts); err != nil {
+		return nil, err
 	}
 
-	s.httpServer = &http.Server{
+	ai.httpServer = &http.Server{
 		Handler: mux,
 	}
 
-	s.db, err = leveldb.New(s.config.DataDir)
-	if err != nil {
-		return err
-	}
+	go ai.grpcServer.Serve(grpcListener)
+	go ai.httpServer.Serve(httpListener)
 
-	if err := s.setupRaft(); err != nil {
-		return err
-	}
-
-	go s.grpcServer.Serve(grpcListener)
-	go s.httpServer.Serve(httpListener)
-
-	return nil
+	return ai, nil
 }
 
-func (s *autoIncrement) Stop() {
-	s.grpcServer.GracefulStop()
-	s.httpGracefulShutdown()
-	s.db.Close()
+// Stop ...
+func (ai *AutoIncrement) Stop() {
+	ai.grpcServer.GracefulStop()
+	ai.httpGracefulShutdown()
+	ai.store.Shutdown()
 }
 
-func (s *autoIncrement) httpGracefulShutdown() {
+func (ai *AutoIncrement) httpGracefulShutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	s.httpServer.Shutdown(ctx)
-}
-
-func (s *autoIncrement) setupRaft() error {
-	config := raft.DefaultConfig()
-	config.LocalID = raft.ServerID(s.config.NodeID)
-
-	transport, err := raft.NewTCPTransport(s.config.RaftAddr, nil, 3, 10*time.Second, os.Stderr)
-	if err != nil {
-		return err
-	}
-
-	store, err := raftboltdb.NewBoltStore(filepath.Join(s.config.RaftDir, "raft.db"))
-	if err != nil {
-		return err
-	}
-
-	logStore, err := raft.NewLogCache(logCacheCapacity, store)
-	if err != nil {
-		return err
-	}
-
-	stableStore := store
-
-	snapshotStore, err := raft.NewFileSnapshotStore(s.config.RaftDir, retainSnapshotCount, os.Stderr)
-	if err != nil {
-		return err
-	}
-
-	ra, err := raft.NewRaft(config, nil, logStore, stableStore, snapshotStore, transport)
-	if err != nil {
-		return err
-	}
-	s.raft = ra
-
-	if s.config.Bootstrap {
-		hasState, err := raft.HasExistingState(logStore, stableStore, snapshotStore)
-		if err != nil {
-			return err
-		}
-		if !hasState {
-			configuration := raft.Configuration{
-				Servers: []raft.Server{
-					{
-						ID:      config.LocalID,
-						Address: transport.LocalAddr(),
-					},
-				},
-			}
-			ra.BootstrapCluster(configuration)
-		}
-	}
-
-	return nil
+	ai.httpServer.Shutdown(ctx)
 }

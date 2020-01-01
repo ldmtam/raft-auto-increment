@@ -15,11 +15,27 @@ genpb:
 		--grpc-gateway_out=logtostderr=true:./auto_increment/pb \
 		idl/auto_increment.proto
 
-run-local:
+run1:
 	go run main.go \
 		--http-addr localhost:3000 \
 		--grpc-addr localhost:4000 \
 		--raft-addr localhost:5000 \
-		--raft-dir ./mock-raft \
-		--data-dir ./mock-data \
+		--raft-dir ./tmp/node1/raft \
+		--data-dir ./tmp/node1/data \
 		--bootstrap true
+
+run2:
+	go run main.go \
+		--http-addr localhost:13000 \
+		--grpc-addr localhost:14000 \
+		--raft-addr localhost:15000 \
+		--raft-dir ./tmp/node2/raft \
+		--data-dir ./tmp/node2/data \
+
+run3:
+	go run main.go \
+		--http-addr localhost:23000 \
+		--grpc-addr localhost:24000 \
+		--raft-addr localhost:25000 \
+		--raft-dir ./tmp/node3/raft \
+		--data-dir ./tmp/node3/data \

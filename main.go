@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	autoIncrement "github.com/ldmtam/raft-auto-increment/auto_increment"
+	"github.com/ldmtam/raft-auto-increment/config"
 )
 
 var (
@@ -34,19 +35,18 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := &autoIncrement.Config{
+	config := &config.Config{
 		NodeID:    nodeID,
 		RaftAddr:  raftAddr,
 		RaftDir:   raftDir,
 		Bootstrap: bootstrap,
-		HttpAddr:  httpAddr,
-		GrpcAddr:  grpcAddr,
+		HTTPAddr:  httpAddr,
+		GRPCAddr:  grpcAddr,
 		DataDir:   dataDir,
 	}
 
-	service := autoIncrement.New(config)
-
-	if err := service.Start(); err != nil {
+	service, err := autoIncrement.New(config)
+	if err != nil {
 		panic(err)
 	}
 

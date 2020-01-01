@@ -1,4 +1,4 @@
-package auto_increment
+package config
 
 // Config represents the config struct for AutoIncrement service
 type Config struct {
@@ -8,11 +8,6 @@ type Config struct {
 	Bootstrap bool
 
 	DataDir  string
-	HttpAddr string
-	GrpcAddr string
+	HTTPAddr string
+	GRPCAddr string
 }
-
-const (
-	retainSnapshotCount = 2
-	logCacheCapacity    = 512
-)
