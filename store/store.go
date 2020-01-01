@@ -1,6 +1,7 @@
 package store
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"time"
@@ -15,6 +16,7 @@ import (
 const (
 	retainSnapshotCount = 2
 	logCacheCapacity    = 512
+	applyTimeout        = 10 * time.Second
 )
 
 // Store represents the Store structure
@@ -51,17 +53,75 @@ func (s *Store) Join(id, addr string) error {
 
 // GetSingle gets next auto-increment ID for particular key
 func (s *Store) GetSingle(key string) (uint64, error) {
-	return 0, nil
+	cmd, err := newCommand(getSingleCmd, &getSinglePayLoad{
+		Key: key,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	cmdBytes, err := json.Marshal(cmd)
+	if err != nil {
+		return 0, err
+	}
+
+	f := s.raft.Apply(cmdBytes, applyTimeout)
+	if f.Error() != nil {
+		return 0, f.Error()
+	}
+
+	resp := f.Response().(*getSingleResponse)
+
+	return resp.value, resp.err
 }
 
 // GetMultiple gets number of `quantity` of auto-increment ID for particular key
 func (s *Store) GetMultiple(key string, quantity uint64) ([]uint64, error) {
-	return []uint64{}, nil
+	cmd, err := newCommand(getMultipleCmd, &getMultiplePayload{
+		Key:      key,
+		Quantity: quantity,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	cmdBytes, err := json.Marshal(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	f := s.raft.Apply(cmdBytes, applyTimeout)
+	if f.Error() != nil {
+		return nil, f.Error()
+	}
+
+	resp := f.Response().(*getMultipleResponse)
+
+	return resp.values, resp.err
 }
 
 // GetLast gets the last inserted id for particular key. This API doesn't change database.
 func (s *Store) GetLast(key string) (uint64, error) {
-	return 0, nil
+	cmd, err := newCommand(getLastCmd, &getLastPayload{
+		Key: key,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	cmdBytes, err := json.Marshal(cmd)
+	if err != nil {
+		return 0, err
+	}
+
+	f := s.raft.Apply(cmdBytes, applyTimeout)
+	if f.Error() != nil {
+		return 0, f.Error()
+	}
+
+	resp := f.Response().(*getLastResponse)
+
+	return resp.value, resp.err
 }
 
 // Shutdown shutdowns the store
