@@ -35,3 +35,13 @@ func (ai *AutoIncrement) GetLast(ctx context.Context, req *pb.GetLastRequest) (*
 
 	return &pb.GetLastResponse{Value: value}, nil
 }
+
+// Join ...
+func (ai *AutoIncrement) Join(ctx context.Context, req *pb.JoinRequest) (*pb.JoinResponse, error) {
+	err := ai.store.Join(req.NodeID, req.NodeAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.JoinResponse{}, nil
+}

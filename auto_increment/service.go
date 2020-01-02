@@ -90,7 +90,6 @@ func New(config *config.Config) (*AutoIncrement, error) {
 
 // Stop ...
 func (ai *AutoIncrement) Stop() {
-	ai.grpcServer.GracefulStop()
 	ai.httpGracefulShutdown()
 	ai.store.Shutdown()
 }

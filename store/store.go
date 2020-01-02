@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/hashicorp/raft"
@@ -23,6 +25,11 @@ const (
 type Store struct {
 	raft *raft.Raft
 
+	leader *uint32
+
+	stopCh chan struct{}
+	wg     sync.WaitGroup
+
 	db     database.AutoIncrement
 	config *config.Config
 }
@@ -31,7 +38,10 @@ type Store struct {
 func New(config *config.Config) (*Store, error) {
 	store := &Store{
 		config: config,
+		leader: new(uint32),
+		stopCh: make(chan struct{}),
 	}
+	atomic.StoreUint32(store.leader, 0)
 
 	db, err := leveldb.New(store.config.DataDir)
 	if err != nil {
@@ -43,16 +53,46 @@ func New(config *config.Config) (*Store, error) {
 		return nil, err
 	}
 
+	store.wg.Add(1)
+	go store.monitorLeadership()
+
 	return store, nil
 }
 
 // Join joins the node given ID, addr to the cluster
 func (s *Store) Join(id, addr string) error {
-	return nil
+	if !s.isLeader() {
+		return raft.ErrNotLeader
+	}
+
+	configFuture := s.raft.GetConfiguration()
+	if err := configFuture.Error(); err != nil {
+		return err
+	}
+
+	for _, srv := range configFuture.Configuration().Servers {
+		if srv.Address == raft.ServerAddress(addr) && srv.ID == raft.ServerID(id) {
+			return nil
+		}
+		if srv.Address == raft.ServerAddress(addr) || srv.ID == raft.ServerID(id) {
+			f := s.raft.RemoveServer(raft.ServerID(id), 0, 0)
+			if f.Error() != nil {
+				return f.Error()
+			}
+		}
+	}
+
+	f := s.raft.AddVoter(raft.ServerID(id), raft.ServerAddress(addr), 0, 0)
+
+	return f.Error()
 }
 
 // GetSingle gets next auto-increment ID for particular key
 func (s *Store) GetSingle(key string) (uint64, error) {
+	if !s.isLeader() {
+		return 0, raft.ErrNotLeader
+	}
+
 	cmd, err := newCommand(getSingleCmd, &getSinglePayLoad{
 		Key: key,
 	})
@@ -77,6 +117,10 @@ func (s *Store) GetSingle(key string) (uint64, error) {
 
 // GetMultiple gets number of `quantity` of auto-increment ID for particular key
 func (s *Store) GetMultiple(key string, quantity uint64) ([]uint64, error) {
+	if !s.isLeader() {
+		return nil, raft.ErrNotLeader
+	}
+
 	cmd, err := newCommand(getMultipleCmd, &getMultiplePayload{
 		Key:      key,
 		Quantity: quantity,
@@ -102,6 +146,10 @@ func (s *Store) GetMultiple(key string, quantity uint64) ([]uint64, error) {
 
 // GetLast gets the last inserted id for particular key. This API doesn't change database.
 func (s *Store) GetLast(key string) (uint64, error) {
+	if !s.isLeader() {
+		return 0, raft.ErrNotLeader
+	}
+
 	cmd, err := newCommand(getLastCmd, &getLastPayload{
 		Key: key,
 	})
@@ -127,6 +175,10 @@ func (s *Store) GetLast(key string) (uint64, error) {
 // Shutdown shutdowns the store
 func (s *Store) Shutdown() error {
 	s.db.Close()
+
+	close(s.stopCh)
+	s.wg.Wait()
+
 	f := s.raft.Shutdown()
 	if f.Error() != nil {
 		return f.Error()
@@ -164,7 +216,7 @@ func (s *Store) setupRaft() error {
 		return err
 	}
 
-	ra, err := raft.NewRaft(config, nil, logStore, stableStore, snapshotStore, transport)
+	ra, err := raft.NewRaft(config, new(raft.MockFSM), logStore, stableStore, snapshotStore, transport)
 	if err != nil {
 		return err
 	}
@@ -189,4 +241,27 @@ func (s *Store) setupRaft() error {
 	}
 
 	return nil
+}
+
+func (s *Store) monitorLeadership() {
+	defer s.wg.Done()
+	for {
+		select {
+		case isLeader := <-s.raft.LeaderCh():
+			if isLeader {
+				atomic.StoreUint32(s.leader, 1)
+			} else {
+				atomic.StoreUint32(s.leader, 0)
+			}
+		case <-s.stopCh:
+			return
+		}
+	}
+}
+
+func (s *Store) isLeader() bool {
+	if atomic.LoadUint32(s.leader) == 1 {
+		return true
+	}
+	return false
 }
