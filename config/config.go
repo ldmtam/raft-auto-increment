@@ -4,10 +4,10 @@ package config
 type Config struct {
 	NodeID    string
 	RaftAddr  string
+	JoinAddr  string
 	RaftDir   string
 	Bootstrap bool
 
-	DataDir  string
-	HTTPAddr string
-	GRPCAddr string
+	DataDir string
+	Addr    string
 }

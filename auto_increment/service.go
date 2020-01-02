@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/soheilhy/cmux"
+
 	"github.com/ldmtam/raft-auto-increment/store"
 
 	"github.com/ldmtam/raft-auto-increment/config"
@@ -57,22 +59,21 @@ func New(config *config.Config) (*AutoIncrement, error) {
 	}
 	ai.store = store
 
-	grpcListener, err := net.Listen("tcp", config.GRPCAddr)
+	listener, err := net.Listen("tcp", config.Addr)
 	if err != nil {
 		return nil, err
 	}
 
-	httpListener, err := net.Listen("tcp", config.HTTPAddr)
-	if err != nil {
-		return nil, err
-	}
+	m := cmux.New(listener)
+	grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpListener := m.Match(cmux.HTTP1Fast())
 
 	ai.grpcServer = grpc.NewServer()
 	pb.RegisterAutoIncrementServer(ai.grpcServer, ai)
 
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, ai.config.GRPCAddr, opts); err != nil {
+	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, ai.config.Addr, opts); err != nil {
 		return nil, err
 	}
 
@@ -82,6 +83,7 @@ func New(config *config.Config) (*AutoIncrement, error) {
 
 	go ai.grpcServer.Serve(grpcListener)
 	go ai.httpServer.Serve(httpListener)
+	go m.Serve()
 
 	return ai, nil
 }
