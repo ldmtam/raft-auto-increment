@@ -126,6 +126,11 @@ func (s *Store) GetLast(key string) (uint64, error) {
 
 // Shutdown shutdowns the store
 func (s *Store) Shutdown() error {
+	s.db.Close()
+	f := s.raft.Shutdown()
+	if f.Error() != nil {
+		return f.Error()
+	}
 	return nil
 }
 
