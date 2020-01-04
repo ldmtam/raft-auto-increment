@@ -24,14 +24,14 @@ type Store interface {
 	// Join joins the node with given ID and address
 	Join(id, addr string) error
 
-	// GetSingle gets next auto-increment ID for particular key
-	GetSingle(key string) (uint64, error)
+	// GetOne gets next auto-increment ID for particular key
+	GetOne(key string) (uint64, error)
 
-	// GetMultiple gets number of `quantity` of auto-increment ID for particular key
-	GetMultiple(key string, quantity uint64) ([]uint64, error)
+	// GetMany gets number of `quantity` of auto-increment ID for particular key
+	GetMany(key string, quantity uint64) ([]uint64, error)
 
-	// GetLast gets the last inserted id for particular key. This API doesn't change database.
-	GetLast(key string) (uint64, error)
+	// GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
+	GetLastInserted(key string) (uint64, error)
 
 	// Shutdown shutdowns the store
 	Shutdown() error

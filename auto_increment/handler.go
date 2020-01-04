@@ -6,34 +6,34 @@ import (
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
 )
 
-// GetSingle ...
-func (ai *AutoIncrement) GetSingle(ctx context.Context, req *pb.GetSingleRequest) (*pb.GetSingleResponse, error) {
-	value, err := ai.store.GetSingle(req.Key)
+// GetOne ...
+func (ai *AutoIncrement) GetOne(ctx context.Context, req *pb.GetOneRequest) (*pb.GetOneResponse, error) {
+	value, err := ai.store.GetOne(req.Key)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetSingleResponse{Key: req.Key, Value: value}, nil
+	return &pb.GetOneResponse{Key: req.Key, Value: value}, nil
 }
 
-// GetMultiple ...
-func (ai *AutoIncrement) GetMultiple(ctx context.Context, req *pb.GetMultipleRequest) (*pb.GetMultipleResponse, error) {
-	values, err := ai.store.GetMultiple(req.Key, req.Quantity)
+// GetMany ...
+func (ai *AutoIncrement) GetMany(ctx context.Context, req *pb.GetManyRequest) (*pb.GetManyResponse, error) {
+	values, err := ai.store.GetMany(req.Key, req.Quantity)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetMultipleResponse{Key: req.Key, Values: values}, nil
+	return &pb.GetManyResponse{Key: req.Key, Values: values}, nil
 }
 
-// GetLast ...
-func (ai *AutoIncrement) GetLast(ctx context.Context, req *pb.GetLastRequest) (*pb.GetLastResponse, error) {
-	value, err := ai.store.GetLast(req.Key)
+// GetLastInserted ...
+func (ai *AutoIncrement) GetLastInserted(ctx context.Context, req *pb.GetLastInsertedRequest) (*pb.GetLastInsertedResponse, error) {
+	value, err := ai.store.GetLastInserted(req.Key)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetLastResponse{Value: value}, nil
+	return &pb.GetLastInsertedResponse{Value: value}, nil
 }
 
 // Join ...

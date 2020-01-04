@@ -1,18 +1,18 @@
 package store
 
-type getSingleResponse struct {
+type getOneResponse struct {
 	key   string
 	value uint64
 	err   error
 }
 
-type getMultipleResponse struct {
+type getManyResponse struct {
 	key    string
 	values []uint64
 	err    error
 }
 
-type getLastResponse struct {
+type getLastInsertedResponse struct {
 	key   string
 	value uint64
 	err   error

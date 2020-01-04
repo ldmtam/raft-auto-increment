@@ -3,23 +3,21 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 
 service AutoIncrement {
-    rpc GetSingle (GetSingleRequest) returns (GetSingleResponse) {
+    rpc GetOne (GetOneRequest) returns (GetOneResponse) {
         option (google.api.http) = {
-            post: "/auto-increment/single",
-            body: "*"
+            get: "/auto-increment/one/{key}",
         };
     }
 
-    rpc GetMultiple (GetMultipleRequest) returns (GetMultipleResponse) {
+    rpc GetMany (GetManyRequest) returns (GetManyResponse) {
         option (google.api.http) = {
-            post: "/auto-increment/multiple",
-            body: "*"
+            get: "/auto-increment/many/{key}/{quantity}",
         };
     }
 
-    rpc GetLast (GetLastRequest) returns (GetLastResponse) {
+    rpc GetLastInserted (GetLastInsertedRequest) returns (GetLastInsertedResponse) {
         option (google.api.http) = {
-            get: "/auto-increment/last/{key}"
+            get: "/auto-increment/last-inserted/{key}"
         };
     }
 
@@ -31,30 +29,30 @@ service AutoIncrement {
     }
 }
 
-message GetSingleRequest {
+message GetOneRequest {
     string key = 1;
 }
 
-message GetSingleResponse {
+message GetOneResponse {
     string key = 1;
     uint64 value = 2;
 }
 
-message GetMultipleRequest {
+message GetManyRequest {
     string key = 1;
     uint64 quantity = 2;
 }
 
-message GetMultipleResponse {
+message GetManyResponse {
     string key = 1;
     repeated uint64 values = 2;
 }
 
-message GetLastRequest {
+message GetLastInsertedRequest {
     string key = 1;
 }
 
-message GetLastResponse {
+message GetLastInsertedResponse {
     string key = 1;
     uint64 value = 2;
 }

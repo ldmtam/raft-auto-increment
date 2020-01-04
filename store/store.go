@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"sync"
@@ -87,13 +88,13 @@ func (s *Store) Join(id, addr string) error {
 	return f.Error()
 }
 
-// GetSingle gets next auto-increment ID for particular key
-func (s *Store) GetSingle(key string) (uint64, error) {
+// GetOne gets next auto-increment ID for particular key
+func (s *Store) GetOne(key string) (uint64, error) {
 	if !s.isLeader() {
 		return 0, raft.ErrNotLeader
 	}
 
-	cmd, err := newCommand(getSingleCmd, &getSinglePayLoad{
+	cmd, err := newCommand(getOneCmd, &getOnePayload{
 		Key: key,
 	})
 	if err != nil {
@@ -110,18 +111,21 @@ func (s *Store) GetSingle(key string) (uint64, error) {
 		return 0, f.Error()
 	}
 
-	resp := f.Response().(*getSingleResponse)
+	resp, ok := f.Response().(*getOneResponse)
+	if !ok {
+		return 0, errors.New("can't assert interface")
+	}
 
 	return resp.value, resp.err
 }
 
-// GetMultiple gets number of `quantity` of auto-increment ID for particular key
-func (s *Store) GetMultiple(key string, quantity uint64) ([]uint64, error) {
+// GetMany gets number of `quantity` of auto-increment ID for particular key
+func (s *Store) GetMany(key string, quantity uint64) ([]uint64, error) {
 	if !s.isLeader() {
 		return nil, raft.ErrNotLeader
 	}
 
-	cmd, err := newCommand(getMultipleCmd, &getMultiplePayload{
+	cmd, err := newCommand(getManyCmd, &getManyPayload{
 		Key:      key,
 		Quantity: quantity,
 	})
@@ -139,18 +143,21 @@ func (s *Store) GetMultiple(key string, quantity uint64) ([]uint64, error) {
 		return nil, f.Error()
 	}
 
-	resp := f.Response().(*getMultipleResponse)
+	resp, ok := f.Response().(*getManyResponse)
+	if !ok {
+		return nil, errors.New("can't assert interface")
+	}
 
 	return resp.values, resp.err
 }
 
-// GetLast gets the last inserted id for particular key. This API doesn't change database.
-func (s *Store) GetLast(key string) (uint64, error) {
+// GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
+func (s *Store) GetLastInserted(key string) (uint64, error) {
 	if !s.isLeader() {
 		return 0, raft.ErrNotLeader
 	}
 
-	cmd, err := newCommand(getLastCmd, &getLastPayload{
+	cmd, err := newCommand(getLastInsertedCmd, &getLastInsertedPayload{
 		Key: key,
 	})
 	if err != nil {
@@ -167,7 +174,10 @@ func (s *Store) GetLast(key string) (uint64, error) {
 		return 0, f.Error()
 	}
 
-	resp := f.Response().(*getLastResponse)
+	resp, ok := f.Response().(*getLastInsertedResponse)
+	if !ok {
+		return 0, errors.New("can't assert interface")
+	}
 
 	return resp.value, resp.err
 }

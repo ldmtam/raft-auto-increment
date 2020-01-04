@@ -25,46 +25,46 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type GetSingleRequest struct {
+type GetOneRequest struct {
 	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetSingleRequest) Reset()         { *m = GetSingleRequest{} }
-func (m *GetSingleRequest) String() string { return proto.CompactTextString(m) }
-func (*GetSingleRequest) ProtoMessage()    {}
-func (*GetSingleRequest) Descriptor() ([]byte, []int) {
+func (m *GetOneRequest) Reset()         { *m = GetOneRequest{} }
+func (m *GetOneRequest) String() string { return proto.CompactTextString(m) }
+func (*GetOneRequest) ProtoMessage()    {}
+func (*GetOneRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_59c5cff9d1a655ea, []int{0}
 }
 
-func (m *GetSingleRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetSingleRequest.Unmarshal(m, b)
+func (m *GetOneRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetOneRequest.Unmarshal(m, b)
 }
-func (m *GetSingleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetSingleRequest.Marshal(b, m, deterministic)
+func (m *GetOneRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetOneRequest.Marshal(b, m, deterministic)
 }
-func (m *GetSingleRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetSingleRequest.Merge(m, src)
+func (m *GetOneRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetOneRequest.Merge(m, src)
 }
-func (m *GetSingleRequest) XXX_Size() int {
-	return xxx_messageInfo_GetSingleRequest.Size(m)
+func (m *GetOneRequest) XXX_Size() int {
+	return xxx_messageInfo_GetOneRequest.Size(m)
 }
-func (m *GetSingleRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetSingleRequest.DiscardUnknown(m)
+func (m *GetOneRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetOneRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetSingleRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetOneRequest proto.InternalMessageInfo
 
-func (m *GetSingleRequest) GetKey() string {
+func (m *GetOneRequest) GetKey() string {
 	if m != nil {
 		return m.Key
 	}
 	return ""
 }
 
-type GetSingleResponse struct {
+type GetOneResponse struct {
 	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	Value                uint64   `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -72,46 +72,46 @@ type GetSingleResponse struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetSingleResponse) Reset()         { *m = GetSingleResponse{} }
-func (m *GetSingleResponse) String() string { return proto.CompactTextString(m) }
-func (*GetSingleResponse) ProtoMessage()    {}
-func (*GetSingleResponse) Descriptor() ([]byte, []int) {
+func (m *GetOneResponse) Reset()         { *m = GetOneResponse{} }
+func (m *GetOneResponse) String() string { return proto.CompactTextString(m) }
+func (*GetOneResponse) ProtoMessage()    {}
+func (*GetOneResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_59c5cff9d1a655ea, []int{1}
 }
 
-func (m *GetSingleResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetSingleResponse.Unmarshal(m, b)
+func (m *GetOneResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetOneResponse.Unmarshal(m, b)
 }
-func (m *GetSingleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetSingleResponse.Marshal(b, m, deterministic)
+func (m *GetOneResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetOneResponse.Marshal(b, m, deterministic)
 }
-func (m *GetSingleResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetSingleResponse.Merge(m, src)
+func (m *GetOneResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetOneResponse.Merge(m, src)
 }
-func (m *GetSingleResponse) XXX_Size() int {
-	return xxx_messageInfo_GetSingleResponse.Size(m)
+func (m *GetOneResponse) XXX_Size() int {
+	return xxx_messageInfo_GetOneResponse.Size(m)
 }
-func (m *GetSingleResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetSingleResponse.DiscardUnknown(m)
+func (m *GetOneResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetOneResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetSingleResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetOneResponse proto.InternalMessageInfo
 
-func (m *GetSingleResponse) GetKey() string {
+func (m *GetOneResponse) GetKey() string {
 	if m != nil {
 		return m.Key
 	}
 	return ""
 }
 
-func (m *GetSingleResponse) GetValue() uint64 {
+func (m *GetOneResponse) GetValue() uint64 {
 	if m != nil {
 		return m.Value
 	}
 	return 0
 }
 
-type GetMultipleRequest struct {
+type GetManyRequest struct {
 	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	Quantity             uint64   `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -119,46 +119,46 @@ type GetMultipleRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetMultipleRequest) Reset()         { *m = GetMultipleRequest{} }
-func (m *GetMultipleRequest) String() string { return proto.CompactTextString(m) }
-func (*GetMultipleRequest) ProtoMessage()    {}
-func (*GetMultipleRequest) Descriptor() ([]byte, []int) {
+func (m *GetManyRequest) Reset()         { *m = GetManyRequest{} }
+func (m *GetManyRequest) String() string { return proto.CompactTextString(m) }
+func (*GetManyRequest) ProtoMessage()    {}
+func (*GetManyRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_59c5cff9d1a655ea, []int{2}
 }
 
-func (m *GetMultipleRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetMultipleRequest.Unmarshal(m, b)
+func (m *GetManyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetManyRequest.Unmarshal(m, b)
 }
-func (m *GetMultipleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetMultipleRequest.Marshal(b, m, deterministic)
+func (m *GetManyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetManyRequest.Marshal(b, m, deterministic)
 }
-func (m *GetMultipleRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetMultipleRequest.Merge(m, src)
+func (m *GetManyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetManyRequest.Merge(m, src)
 }
-func (m *GetMultipleRequest) XXX_Size() int {
-	return xxx_messageInfo_GetMultipleRequest.Size(m)
+func (m *GetManyRequest) XXX_Size() int {
+	return xxx_messageInfo_GetManyRequest.Size(m)
 }
-func (m *GetMultipleRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetMultipleRequest.DiscardUnknown(m)
+func (m *GetManyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetManyRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetMultipleRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetManyRequest proto.InternalMessageInfo
 
-func (m *GetMultipleRequest) GetKey() string {
+func (m *GetManyRequest) GetKey() string {
 	if m != nil {
 		return m.Key
 	}
 	return ""
 }
 
-func (m *GetMultipleRequest) GetQuantity() uint64 {
+func (m *GetManyRequest) GetQuantity() uint64 {
 	if m != nil {
 		return m.Quantity
 	}
 	return 0
 }
 
-type GetMultipleResponse struct {
+type GetManyResponse struct {
 	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	Values               []uint64 `protobuf:"varint,2,rep,packed,name=values,proto3" json:"values,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -166,85 +166,85 @@ type GetMultipleResponse struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetMultipleResponse) Reset()         { *m = GetMultipleResponse{} }
-func (m *GetMultipleResponse) String() string { return proto.CompactTextString(m) }
-func (*GetMultipleResponse) ProtoMessage()    {}
-func (*GetMultipleResponse) Descriptor() ([]byte, []int) {
+func (m *GetManyResponse) Reset()         { *m = GetManyResponse{} }
+func (m *GetManyResponse) String() string { return proto.CompactTextString(m) }
+func (*GetManyResponse) ProtoMessage()    {}
+func (*GetManyResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_59c5cff9d1a655ea, []int{3}
 }
 
-func (m *GetMultipleResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetMultipleResponse.Unmarshal(m, b)
+func (m *GetManyResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetManyResponse.Unmarshal(m, b)
 }
-func (m *GetMultipleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetMultipleResponse.Marshal(b, m, deterministic)
+func (m *GetManyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetManyResponse.Marshal(b, m, deterministic)
 }
-func (m *GetMultipleResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetMultipleResponse.Merge(m, src)
+func (m *GetManyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetManyResponse.Merge(m, src)
 }
-func (m *GetMultipleResponse) XXX_Size() int {
-	return xxx_messageInfo_GetMultipleResponse.Size(m)
+func (m *GetManyResponse) XXX_Size() int {
+	return xxx_messageInfo_GetManyResponse.Size(m)
 }
-func (m *GetMultipleResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetMultipleResponse.DiscardUnknown(m)
+func (m *GetManyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetManyResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetMultipleResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetManyResponse proto.InternalMessageInfo
 
-func (m *GetMultipleResponse) GetKey() string {
+func (m *GetManyResponse) GetKey() string {
 	if m != nil {
 		return m.Key
 	}
 	return ""
 }
 
-func (m *GetMultipleResponse) GetValues() []uint64 {
+func (m *GetManyResponse) GetValues() []uint64 {
 	if m != nil {
 		return m.Values
 	}
 	return nil
 }
 
-type GetLastRequest struct {
+type GetLastInsertedRequest struct {
 	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetLastRequest) Reset()         { *m = GetLastRequest{} }
-func (m *GetLastRequest) String() string { return proto.CompactTextString(m) }
-func (*GetLastRequest) ProtoMessage()    {}
-func (*GetLastRequest) Descriptor() ([]byte, []int) {
+func (m *GetLastInsertedRequest) Reset()         { *m = GetLastInsertedRequest{} }
+func (m *GetLastInsertedRequest) String() string { return proto.CompactTextString(m) }
+func (*GetLastInsertedRequest) ProtoMessage()    {}
+func (*GetLastInsertedRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_59c5cff9d1a655ea, []int{4}
 }
 
-func (m *GetLastRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetLastRequest.Unmarshal(m, b)
+func (m *GetLastInsertedRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetLastInsertedRequest.Unmarshal(m, b)
 }
-func (m *GetLastRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetLastRequest.Marshal(b, m, deterministic)
+func (m *GetLastInsertedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetLastInsertedRequest.Marshal(b, m, deterministic)
 }
-func (m *GetLastRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetLastRequest.Merge(m, src)
+func (m *GetLastInsertedRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetLastInsertedRequest.Merge(m, src)
 }
-func (m *GetLastRequest) XXX_Size() int {
-	return xxx_messageInfo_GetLastRequest.Size(m)
+func (m *GetLastInsertedRequest) XXX_Size() int {
+	return xxx_messageInfo_GetLastInsertedRequest.Size(m)
 }
-func (m *GetLastRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetLastRequest.DiscardUnknown(m)
+func (m *GetLastInsertedRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetLastInsertedRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetLastRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetLastInsertedRequest proto.InternalMessageInfo
 
-func (m *GetLastRequest) GetKey() string {
+func (m *GetLastInsertedRequest) GetKey() string {
 	if m != nil {
 		return m.Key
 	}
 	return ""
 }
 
-type GetLastResponse struct {
+type GetLastInsertedResponse struct {
 	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
 	Value                uint64   `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -252,39 +252,39 @@ type GetLastResponse struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetLastResponse) Reset()         { *m = GetLastResponse{} }
-func (m *GetLastResponse) String() string { return proto.CompactTextString(m) }
-func (*GetLastResponse) ProtoMessage()    {}
-func (*GetLastResponse) Descriptor() ([]byte, []int) {
+func (m *GetLastInsertedResponse) Reset()         { *m = GetLastInsertedResponse{} }
+func (m *GetLastInsertedResponse) String() string { return proto.CompactTextString(m) }
+func (*GetLastInsertedResponse) ProtoMessage()    {}
+func (*GetLastInsertedResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_59c5cff9d1a655ea, []int{5}
 }
 
-func (m *GetLastResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetLastResponse.Unmarshal(m, b)
+func (m *GetLastInsertedResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetLastInsertedResponse.Unmarshal(m, b)
 }
-func (m *GetLastResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetLastResponse.Marshal(b, m, deterministic)
+func (m *GetLastInsertedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetLastInsertedResponse.Marshal(b, m, deterministic)
 }
-func (m *GetLastResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetLastResponse.Merge(m, src)
+func (m *GetLastInsertedResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetLastInsertedResponse.Merge(m, src)
 }
-func (m *GetLastResponse) XXX_Size() int {
-	return xxx_messageInfo_GetLastResponse.Size(m)
+func (m *GetLastInsertedResponse) XXX_Size() int {
+	return xxx_messageInfo_GetLastInsertedResponse.Size(m)
 }
-func (m *GetLastResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetLastResponse.DiscardUnknown(m)
+func (m *GetLastInsertedResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetLastInsertedResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetLastResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetLastInsertedResponse proto.InternalMessageInfo
 
-func (m *GetLastResponse) GetKey() string {
+func (m *GetLastInsertedResponse) GetKey() string {
 	if m != nil {
 		return m.Key
 	}
 	return ""
 }
 
-func (m *GetLastResponse) GetValue() uint64 {
+func (m *GetLastInsertedResponse) GetValue() uint64 {
 	if m != nil {
 		return m.Value
 	}
@@ -370,12 +370,12 @@ func (m *JoinResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_JoinResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*GetSingleRequest)(nil), "GetSingleRequest")
-	proto.RegisterType((*GetSingleResponse)(nil), "GetSingleResponse")
-	proto.RegisterType((*GetMultipleRequest)(nil), "GetMultipleRequest")
-	proto.RegisterType((*GetMultipleResponse)(nil), "GetMultipleResponse")
-	proto.RegisterType((*GetLastRequest)(nil), "GetLastRequest")
-	proto.RegisterType((*GetLastResponse)(nil), "GetLastResponse")
+	proto.RegisterType((*GetOneRequest)(nil), "GetOneRequest")
+	proto.RegisterType((*GetOneResponse)(nil), "GetOneResponse")
+	proto.RegisterType((*GetManyRequest)(nil), "GetManyRequest")
+	proto.RegisterType((*GetManyResponse)(nil), "GetManyResponse")
+	proto.RegisterType((*GetLastInsertedRequest)(nil), "GetLastInsertedRequest")
+	proto.RegisterType((*GetLastInsertedResponse)(nil), "GetLastInsertedResponse")
 	proto.RegisterType((*JoinRequest)(nil), "JoinRequest")
 	proto.RegisterType((*JoinResponse)(nil), "JoinResponse")
 }
@@ -383,33 +383,34 @@ func init() {
 func init() { proto.RegisterFile("auto_increment.proto", fileDescriptor_59c5cff9d1a655ea) }
 
 var fileDescriptor_59c5cff9d1a655ea = []byte{
-	// 410 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x93, 0xcd, 0xaa, 0xd3, 0x40,
-	0x1c, 0xc5, 0x49, 0x5a, 0xab, 0xfd, 0xf7, 0x7b, 0x1a, 0x4a, 0x8c, 0x15, 0xe3, 0xe8, 0xa2, 0x14,
-	0x9c, 0x80, 0xae, 0xac, 0x0b, 0xa9, 0x14, 0x42, 0x45, 0x41, 0x22, 0x2e, 0x45, 0x46, 0x3b, 0x94,
-	0xb1, 0xe9, 0x4c, 0xda, 0x99, 0x08, 0x45, 0xdc, 0xf8, 0x0a, 0x3e, 0x9a, 0x6b, 0x77, 0x3e, 0xc8,
-	0x25, 0x1f, 0x0d, 0x69, 0x7a, 0x7b, 0xe1, 0xee, 0xe6, 0x24, 0x27, 0xbf, 0x99, 0x39, 0xe7, 0x1f,
-	0xb0, 0x68, 0xac, 0xe5, 0x17, 0x2e, 0xbe, 0xed, 0xd9, 0x96, 0x09, 0x4d, 0xa2, 0xbd, 0xd4, 0xd2,
-	0x19, 0xaf, 0xa5, 0x5c, 0x87, 0xcc, 0xa3, 0x11, 0xf7, 0xa8, 0x10, 0x52, 0x53, 0xcd, 0xa5, 0x50,
-	0xd9, 0x5b, 0xfc, 0x14, 0xfa, 0x3e, 0xd3, 0x1f, 0xb9, 0x58, 0x87, 0x2c, 0x60, 0xbb, 0x98, 0x29,
-	0x8d, 0xfa, 0x50, 0xdb, 0xb0, 0x83, 0x6d, 0xb8, 0xc6, 0xa4, 0x19, 0x24, 0x4b, 0xfc, 0x0a, 0x06,
-	0x25, 0x97, 0x8a, 0xa4, 0x50, 0xec, 0xdc, 0x86, 0x2c, 0xb8, 0xf3, 0x83, 0x86, 0x31, 0xb3, 0x4d,
-	0xd7, 0x98, 0xd4, 0x83, 0x4c, 0xe0, 0x37, 0x80, 0x7c, 0xa6, 0xdf, 0xc7, 0xa1, 0xe6, 0xd1, 0x0d,
-	0x9b, 0x20, 0x07, 0xee, 0xed, 0x62, 0x2a, 0x34, 0xd7, 0x87, 0x1c, 0x50, 0x68, 0xfc, 0x1a, 0x86,
-	0x27, 0x8c, 0x8b, 0x47, 0x18, 0x41, 0x23, 0xdd, 0x55, 0xd9, 0xa6, 0x5b, 0x9b, 0xd4, 0x83, 0x5c,
-	0x61, 0x0c, 0x5d, 0x9f, 0xe9, 0x77, 0x54, 0xe9, 0xcb, 0xb7, 0x7c, 0x09, 0xbd, 0xc2, 0x73, 0xcb,
-	0x3b, 0xfa, 0xd0, 0x7a, 0x2b, 0xb9, 0x38, 0xb2, 0x47, 0xd0, 0x10, 0x72, 0xc5, 0x96, 0x8b, 0xfc,
-	0xcb, 0x5c, 0x21, 0x17, 0x5a, 0xc9, 0x6a, 0xbe, 0x5a, 0xed, 0x99, 0x52, 0x29, 0xa2, 0x19, 0x94,
-	0x1f, 0xe1, 0x2e, 0xb4, 0x33, 0x50, 0x76, 0x80, 0xe7, 0xff, 0x4c, 0xe8, 0xcc, 0x63, 0x2d, 0x97,
-	0xc7, 0x56, 0xd1, 0x27, 0x68, 0x16, 0x5d, 0xa0, 0x01, 0xa9, 0xb6, 0xe7, 0x20, 0x72, 0x56, 0x15,
-	0x7e, 0xfc, 0xfb, 0xef, 0xff, 0x3f, 0xe6, 0x03, 0x3c, 0xf2, 0x92, 0x11, 0x79, 0x56, 0x8c, 0x88,
-	0xa7, 0x52, 0xdf, 0xcc, 0x98, 0xa2, 0xcf, 0xd0, 0x2a, 0x25, 0x8c, 0x86, 0xe4, 0xbc, 0x33, 0xc7,
-	0x22, 0xd7, 0x94, 0x80, 0x9f, 0xa4, 0xf0, 0x87, 0xd8, 0xae, 0xc2, 0xb7, 0xb9, 0x33, 0xc1, 0x7f,
-	0x80, 0xbb, 0x79, 0xb6, 0xa8, 0x47, 0x4e, 0x9b, 0x70, 0xfa, 0xa4, 0x12, 0x3b, 0xc6, 0x29, 0x72,
-	0x8c, 0x9c, 0x2a, 0x32, 0xa4, 0x4a, 0x7b, 0x3f, 0x37, 0xec, 0xf0, 0x0b, 0x2d, 0xa0, 0x9e, 0x24,
-	0x85, 0xda, 0xa4, 0x94, 0xbc, 0xd3, 0x21, 0xe5, 0xf8, 0xf0, 0xa3, 0x14, 0x74, 0x1f, 0x5b, 0x55,
-	0xd0, 0x77, 0xc9, 0xc5, 0xcc, 0x98, 0x7e, 0x6d, 0xa4, 0xbf, 0xc1, 0x8b, 0xab, 0x00, 0x00, 0x00,
-	0xff, 0xff, 0x7a, 0x7e, 0xb3, 0xbf, 0x3c, 0x03, 0x00, 0x00,
+	// 422 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x93, 0xd1, 0x8a, 0xd3, 0x40,
+	0x14, 0x86, 0x49, 0xb6, 0x46, 0xf7, 0xec, 0xb6, 0xbb, 0x0c, 0xa5, 0x9b, 0x8d, 0x82, 0xd9, 0x91,
+	0xc5, 0xb2, 0xd2, 0x09, 0xe8, 0x8d, 0x28, 0x08, 0x85, 0x85, 0x52, 0xa9, 0x08, 0xb9, 0xf5, 0x42,
+	0x46, 0x73, 0x28, 0xb1, 0xed, 0x4c, 0x9b, 0x99, 0x08, 0xa1, 0xf4, 0xc6, 0x57, 0xf0, 0xd1, 0x7c,
+	0x05, 0xdf, 0xc0, 0x17, 0x90, 0x4c, 0x92, 0x92, 0xa6, 0xe6, 0xc2, 0xbb, 0x39, 0xc9, 0x39, 0xff,
+	0x9f, 0xf3, 0x7f, 0x13, 0xe8, 0xf3, 0x54, 0xcb, 0xcf, 0xb1, 0xf8, 0x9a, 0xe0, 0x0a, 0x85, 0x66,
+	0xeb, 0x44, 0x6a, 0xe9, 0x3d, 0x99, 0x4b, 0x39, 0x5f, 0x62, 0xc0, 0xd7, 0x71, 0xc0, 0x85, 0x90,
+	0x9a, 0xeb, 0x58, 0x0a, 0x55, 0xbc, 0xa5, 0x37, 0xd0, 0x9d, 0xa0, 0xfe, 0x28, 0x30, 0xc4, 0x4d,
+	0x8a, 0x4a, 0x93, 0x4b, 0x38, 0x59, 0x60, 0xe6, 0x5a, 0xbe, 0x35, 0x3c, 0x0d, 0xf3, 0x23, 0x7d,
+	0x0d, 0xbd, 0xaa, 0x45, 0xad, 0xa5, 0x50, 0x78, 0xdc, 0x43, 0xfa, 0xf0, 0xe0, 0x3b, 0x5f, 0xa6,
+	0xe8, 0xda, 0xbe, 0x35, 0xec, 0x84, 0x45, 0x41, 0xdf, 0x99, 0xc9, 0x0f, 0x5c, 0x64, 0xad, 0xea,
+	0xc4, 0x83, 0x47, 0x9b, 0x94, 0x0b, 0x1d, 0xeb, 0xac, 0x1c, 0xde, 0xd7, 0xf4, 0x2d, 0x5c, 0xec,
+	0xe7, 0x5b, 0xad, 0x07, 0xe0, 0x18, 0x37, 0xe5, 0xda, 0xfe, 0xc9, 0xb0, 0x13, 0x96, 0x15, 0xbd,
+	0x83, 0xc1, 0x04, 0xf5, 0x8c, 0x2b, 0x3d, 0x15, 0x0a, 0x13, 0x8d, 0x51, 0xfb, 0x8a, 0x63, 0xb8,
+	0x3a, 0xea, 0xfd, 0xcf, 0x5d, 0x27, 0x70, 0xf6, 0x5e, 0xc6, 0xa2, 0xf2, 0x18, 0x80, 0x23, 0x64,
+	0x84, 0xd3, 0xfb, 0x72, 0xb2, 0xac, 0x88, 0x0f, 0x67, 0xf9, 0x69, 0x1c, 0x45, 0x09, 0x2a, 0x65,
+	0x24, 0x4e, 0xc3, 0xfa, 0x23, 0xda, 0x83, 0xf3, 0x42, 0xa8, 0xf8, 0x80, 0x97, 0x7f, 0x6c, 0xe8,
+	0x8e, 0x53, 0x2d, 0xa7, 0x15, 0x57, 0x32, 0x03, 0xa7, 0x00, 0x42, 0x7a, 0xec, 0x00, 0x9e, 0x77,
+	0xc1, 0x0e, 0x49, 0xd1, 0x9b, 0x1f, 0xbf, 0x7e, 0xff, 0xb4, 0x1f, 0x93, 0xeb, 0x20, 0xbf, 0x1b,
+	0xa3, 0xfd, 0xdd, 0x08, 0xa4, 0xc0, 0x60, 0xbb, 0xc0, 0x6c, 0x47, 0x3e, 0xc1, 0xc3, 0x32, 0x64,
+	0x62, 0xc6, 0x6b, 0xb8, 0xbc, 0x4b, 0xd6, 0xc8, 0x9f, 0x8e, 0x8c, 0xe0, 0x73, 0x72, 0xdb, 0x14,
+	0x5c, 0x71, 0x91, 0x15, 0x8a, 0xc1, 0xb6, 0x02, 0xb8, 0x23, 0x1b, 0x43, 0xb0, 0x1e, 0x2c, 0xb9,
+	0x62, 0xff, 0xc6, 0xe2, 0xb9, 0xac, 0x85, 0x01, 0x7d, 0x61, 0x4c, 0x6f, 0xc9, 0xb3, 0xa6, 0xe9,
+	0x92, 0x2b, 0x3d, 0x8a, 0xcb, 0xf6, 0x72, 0x9f, 0x7b, 0xe8, 0xe4, 0xf9, 0x91, 0x73, 0x56, 0xe3,
+	0xe1, 0x75, 0x59, 0x3d, 0x54, 0xfa, 0xd4, 0x28, 0x5e, 0xd3, 0x7e, 0x53, 0xf1, 0x9b, 0x8c, 0xc5,
+	0x1b, 0xeb, 0xee, 0x8b, 0x63, 0x7e, 0x8f, 0x57, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff, 0xc2, 0x40,
+	0x18, 0x0c, 0x54, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -424,9 +425,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AutoIncrementClient interface {
-	GetSingle(ctx context.Context, in *GetSingleRequest, opts ...grpc.CallOption) (*GetSingleResponse, error)
-	GetMultiple(ctx context.Context, in *GetMultipleRequest, opts ...grpc.CallOption) (*GetMultipleResponse, error)
-	GetLast(ctx context.Context, in *GetLastRequest, opts ...grpc.CallOption) (*GetLastResponse, error)
+	GetOne(ctx context.Context, in *GetOneRequest, opts ...grpc.CallOption) (*GetOneResponse, error)
+	GetMany(ctx context.Context, in *GetManyRequest, opts ...grpc.CallOption) (*GetManyResponse, error)
+	GetLastInserted(ctx context.Context, in *GetLastInsertedRequest, opts ...grpc.CallOption) (*GetLastInsertedResponse, error)
 	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error)
 }
 
@@ -438,27 +439,27 @@ func NewAutoIncrementClient(cc *grpc.ClientConn) AutoIncrementClient {
 	return &autoIncrementClient{cc}
 }
 
-func (c *autoIncrementClient) GetSingle(ctx context.Context, in *GetSingleRequest, opts ...grpc.CallOption) (*GetSingleResponse, error) {
-	out := new(GetSingleResponse)
-	err := c.cc.Invoke(ctx, "/AutoIncrement/GetSingle", in, out, opts...)
+func (c *autoIncrementClient) GetOne(ctx context.Context, in *GetOneRequest, opts ...grpc.CallOption) (*GetOneResponse, error) {
+	out := new(GetOneResponse)
+	err := c.cc.Invoke(ctx, "/AutoIncrement/GetOne", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *autoIncrementClient) GetMultiple(ctx context.Context, in *GetMultipleRequest, opts ...grpc.CallOption) (*GetMultipleResponse, error) {
-	out := new(GetMultipleResponse)
-	err := c.cc.Invoke(ctx, "/AutoIncrement/GetMultiple", in, out, opts...)
+func (c *autoIncrementClient) GetMany(ctx context.Context, in *GetManyRequest, opts ...grpc.CallOption) (*GetManyResponse, error) {
+	out := new(GetManyResponse)
+	err := c.cc.Invoke(ctx, "/AutoIncrement/GetMany", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *autoIncrementClient) GetLast(ctx context.Context, in *GetLastRequest, opts ...grpc.CallOption) (*GetLastResponse, error) {
-	out := new(GetLastResponse)
-	err := c.cc.Invoke(ctx, "/AutoIncrement/GetLast", in, out, opts...)
+func (c *autoIncrementClient) GetLastInserted(ctx context.Context, in *GetLastInsertedRequest, opts ...grpc.CallOption) (*GetLastInsertedResponse, error) {
+	out := new(GetLastInsertedResponse)
+	err := c.cc.Invoke(ctx, "/AutoIncrement/GetLastInserted", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -476,9 +477,9 @@ func (c *autoIncrementClient) Join(ctx context.Context, in *JoinRequest, opts ..
 
 // AutoIncrementServer is the server API for AutoIncrement service.
 type AutoIncrementServer interface {
-	GetSingle(context.Context, *GetSingleRequest) (*GetSingleResponse, error)
-	GetMultiple(context.Context, *GetMultipleRequest) (*GetMultipleResponse, error)
-	GetLast(context.Context, *GetLastRequest) (*GetLastResponse, error)
+	GetOne(context.Context, *GetOneRequest) (*GetOneResponse, error)
+	GetMany(context.Context, *GetManyRequest) (*GetManyResponse, error)
+	GetLastInserted(context.Context, *GetLastInsertedRequest) (*GetLastInsertedResponse, error)
 	Join(context.Context, *JoinRequest) (*JoinResponse, error)
 }
 
@@ -486,14 +487,14 @@ type AutoIncrementServer interface {
 type UnimplementedAutoIncrementServer struct {
 }
 
-func (*UnimplementedAutoIncrementServer) GetSingle(ctx context.Context, req *GetSingleRequest) (*GetSingleResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSingle not implemented")
+func (*UnimplementedAutoIncrementServer) GetOne(ctx context.Context, req *GetOneRequest) (*GetOneResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOne not implemented")
 }
-func (*UnimplementedAutoIncrementServer) GetMultiple(ctx context.Context, req *GetMultipleRequest) (*GetMultipleResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMultiple not implemented")
+func (*UnimplementedAutoIncrementServer) GetMany(ctx context.Context, req *GetManyRequest) (*GetManyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMany not implemented")
 }
-func (*UnimplementedAutoIncrementServer) GetLast(ctx context.Context, req *GetLastRequest) (*GetLastResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetLast not implemented")
+func (*UnimplementedAutoIncrementServer) GetLastInserted(ctx context.Context, req *GetLastInsertedRequest) (*GetLastInsertedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLastInserted not implemented")
 }
 func (*UnimplementedAutoIncrementServer) Join(ctx context.Context, req *JoinRequest) (*JoinResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
@@ -503,56 +504,56 @@ func RegisterAutoIncrementServer(s *grpc.Server, srv AutoIncrementServer) {
 	s.RegisterService(&_AutoIncrement_serviceDesc, srv)
 }
 
-func _AutoIncrement_GetSingle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSingleRequest)
+func _AutoIncrement_GetOne_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOneRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AutoIncrementServer).GetSingle(ctx, in)
+		return srv.(AutoIncrementServer).GetOne(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AutoIncrement/GetSingle",
+		FullMethod: "/AutoIncrement/GetOne",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AutoIncrementServer).GetSingle(ctx, req.(*GetSingleRequest))
+		return srv.(AutoIncrementServer).GetOne(ctx, req.(*GetOneRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AutoIncrement_GetMultiple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMultipleRequest)
+func _AutoIncrement_GetMany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetManyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AutoIncrementServer).GetMultiple(ctx, in)
+		return srv.(AutoIncrementServer).GetMany(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AutoIncrement/GetMultiple",
+		FullMethod: "/AutoIncrement/GetMany",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AutoIncrementServer).GetMultiple(ctx, req.(*GetMultipleRequest))
+		return srv.(AutoIncrementServer).GetMany(ctx, req.(*GetManyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AutoIncrement_GetLast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetLastRequest)
+func _AutoIncrement_GetLastInserted_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLastInsertedRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AutoIncrementServer).GetLast(ctx, in)
+		return srv.(AutoIncrementServer).GetLastInserted(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AutoIncrement/GetLast",
+		FullMethod: "/AutoIncrement/GetLastInserted",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AutoIncrementServer).GetLast(ctx, req.(*GetLastRequest))
+		return srv.(AutoIncrementServer).GetLastInserted(ctx, req.(*GetLastInsertedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -580,16 +581,16 @@ var _AutoIncrement_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*AutoIncrementServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetSingle",
-			Handler:    _AutoIncrement_GetSingle_Handler,
+			MethodName: "GetOne",
+			Handler:    _AutoIncrement_GetOne_Handler,
 		},
 		{
-			MethodName: "GetMultiple",
-			Handler:    _AutoIncrement_GetMultiple_Handler,
+			MethodName: "GetMany",
+			Handler:    _AutoIncrement_GetMany_Handler,
 		},
 		{
-			MethodName: "GetLast",
-			Handler:    _AutoIncrement_GetLast_Handler,
+			MethodName: "GetLastInserted",
+			Handler:    _AutoIncrement_GetLastInserted_Handler,
 		},
 		{
 			MethodName: "Join",
