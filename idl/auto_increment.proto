@@ -45,7 +45,8 @@ message GetManyRequest {
 
 message GetManyResponse {
     string key = 1;
-    repeated uint64 values = 2;
+    uint64 from = 2;
+    uint64 to = 3;
 }
 
 message GetLastInsertedRequest {

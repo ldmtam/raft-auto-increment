@@ -126,9 +126,9 @@ func (s *Store) GetOne(key string) (uint64, error) {
 }
 
 // GetMany gets number of `quantity` of auto-increment ID for particular key
-func (s *Store) GetMany(key string, quantity uint64) ([]uint64, error) {
+func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 	if !s.isLeader() {
-		return nil, raft.ErrNotLeader
+		return 0, 0, raft.ErrNotLeader
 	}
 
 	cmd, err := newCommand(getManyCmd, &getManyPayload{
@@ -136,26 +136,26 @@ func (s *Store) GetMany(key string, quantity uint64) ([]uint64, error) {
 		Quantity: quantity,
 	})
 	if err != nil {
-		return nil, err
+		return 0, 0, err
 	}
 
 	cmdBytes, err := json.Marshal(cmd)
 	if err != nil {
-		return nil, err
+		return 0, 0, err
 	}
 
 	f := s.raft.Apply(cmdBytes, applyTimeout)
 	if f.Error() != nil {
-		return nil, f.Error()
+		return 0, 0, f.Error()
 	}
 
 	switch resp := f.Response().(type) {
 	case *fsmGetManyResponse:
-		return resp.values, resp.err
+		return resp.from, resp.to, resp.err
 	case *fsmErrorResponse:
-		return nil, resp.err
+		return 0, 0, resp.err
 	default:
-		return nil, errors.New("unknown error")
+		return 0, 0, errors.New("unknown error")
 	}
 }
 

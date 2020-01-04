@@ -18,12 +18,12 @@ func (ai *AutoIncrement) GetOne(ctx context.Context, req *pb.GetOneRequest) (*pb
 
 // GetMany ...
 func (ai *AutoIncrement) GetMany(ctx context.Context, req *pb.GetManyRequest) (*pb.GetManyResponse, error) {
-	values, err := ai.store.GetMany(req.Key, req.Quantity)
+	from, to, err := ai.store.GetMany(req.Key, req.Quantity)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetManyResponse{Key: req.Key, Values: values}, nil
+	return &pb.GetManyResponse{Key: req.Key, From: from, To: to}, nil
 }
 
 // GetLastInserted ...
@@ -33,7 +33,7 @@ func (ai *AutoIncrement) GetLastInserted(ctx context.Context, req *pb.GetLastIns
 		return nil, err
 	}
 
-	return &pb.GetLastInsertedResponse{Value: value}, nil
+	return &pb.GetLastInsertedResponse{Key: req.Key, Value: value}, nil
 }
 
 // Join ...

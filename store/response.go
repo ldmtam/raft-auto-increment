@@ -7,9 +7,10 @@ type fsmGetOneResponse struct {
 }
 
 type fsmGetManyResponse struct {
-	key    string
-	values []uint64
-	err    error
+	key  string
+	from uint64
+	to   uint64
+	err  error
 }
 
 type fsmGetLastInsertedResponse struct {

@@ -28,7 +28,7 @@ type Store interface {
 	GetOne(key string) (uint64, error)
 
 	// GetMany gets number of `quantity` of auto-increment ID for particular key
-	GetMany(key string, quantity uint64) ([]uint64, error)
+	GetMany(key string, quantity uint64) (uint64, uint64, error)
 
 	// GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
 	GetLastInserted(key string) (uint64, error)

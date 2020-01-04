@@ -54,11 +54,12 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 		if err := json.Unmarshal(cmd.Payload, &p); err != nil {
 			return &fsmErrorResponse{err: fmt.Errorf("failed to unmarshal getManyPayload: %v", cmd.Payload)}
 		}
-		values, err := f.db.GetMany(p.Key, p.Quantity)
+		from, to, err := f.db.GetMany(p.Key, p.Quantity)
 		return &fsmGetManyResponse{
-			key:    p.Key,
-			values: values,
-			err:    err,
+			key:  p.Key,
+			from: from,
+			to:   to,
+			err:  err,
 		}
 	case getLastInsertedCmd:
 		var p getLastInsertedPayload

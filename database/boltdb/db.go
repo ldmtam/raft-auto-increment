@@ -86,8 +86,8 @@ func (d *autoIncrementDB) GetOne(key string) (uint64, error) {
 	return value, nil
 }
 
-func (d *autoIncrementDB) GetMany(key string, quantity uint64) ([]uint64, error) {
-	values := make([]uint64, quantity)
+func (d *autoIncrementDB) GetMany(key string, quantity uint64) (uint64, uint64, error) {
+	var from, to uint64
 
 	if err := d.db.Batch(func(tx *bolt.Tx) error {
 		bucketName, err := d.getBucket(key)
@@ -109,16 +109,14 @@ func (d *autoIncrementDB) GetMany(key string, quantity uint64) ([]uint64, error)
 			oldValue = common.ByteToUint64(oldValueBytes)
 		}
 
-		for i := uint64(0); i < quantity; i++ {
-			values[i] = oldValue + i + 1
-		}
+		from, to = oldValue+1, oldValue+quantity
 
 		return bucket.Put([]byte(key), common.Uint64ToByte(oldValue+quantity))
 	}); err != nil {
-		return nil, err
+		return 0, 0, err
 	}
 
-	return values, nil
+	return from, to, nil
 }
 
 func (d *autoIncrementDB) GetLastInserted(key string) (uint64, error) {

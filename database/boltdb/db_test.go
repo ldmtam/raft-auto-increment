@@ -45,11 +45,9 @@ func Test_GetOne(t *testing.T) {
 }
 
 func Test_GetMany(t *testing.T) {
-	result, err := testDB.GetMany("key1", 5)
+	from, to, err := testDB.GetMany("key1", 5)
 	assert.Nil(t, err)
-	assert.NotNil(t, result)
-	assert.Len(t, result, 5)
-	fmt.Println(result)
+	fmt.Println(from, to)
 }
 
 func Test_GetLastInserted(t *testing.T) {
