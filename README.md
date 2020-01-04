@@ -1,5 +1,7 @@
 # Raft Auto Increment
-Distributed, fault-tolerant, persistent auto increment service with Raft consensus.
+Distributed, fault-tolerant, persistent auto increment service with Raft consensus. <br/>
+
+Support both REST API and gRPC.
 
 # What is Raft consensus?
 Please refer to this [page](https://raft.github.io/) for more detail.
