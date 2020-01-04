@@ -11,3 +11,7 @@ type Config struct {
 	DataDir string
 	Addr    string
 }
+
+const (
+	DB_FILE_NAME = "data.db"
+)

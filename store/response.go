@@ -1,19 +1,23 @@
 package store
 
-type getOneResponse struct {
+type fsmGetOneResponse struct {
 	key   string
 	value uint64
 	err   error
 }
 
-type getManyResponse struct {
+type fsmGetManyResponse struct {
 	key    string
 	values []uint64
 	err    error
 }
 
-type getLastInsertedResponse struct {
+type fsmGetLastInsertedResponse struct {
 	key   string
 	value uint64
 	err   error
+}
+
+type fsmErrorResponse struct {
+	err error
 }

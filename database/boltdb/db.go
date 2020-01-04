@@ -7,6 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ldmtam/raft-auto-increment/common"
+
+	"github.com/ldmtam/raft-auto-increment/config"
+
 	"github.com/boltdb/bolt"
 	"github.com/ldmtam/raft-auto-increment/database"
 	"github.com/spaolacci/murmur3"
@@ -30,7 +34,7 @@ func New(path string) (database.AutoIncrement, error) {
 		return nil, err
 	}
 
-	db, err := bolt.Open(filepath.Join(path, "data.db"), 0777, nil)
+	db, err := bolt.Open(filepath.Join(path, config.DB_FILE_NAME), 0777, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -69,12 +73,12 @@ func (d *autoIncrementDB) GetOne(key string) (uint64, error) {
 		if oldValueBytes == nil {
 			oldValue = 0
 		} else {
-			oldValue = database.ByteToUint64(oldValueBytes)
+			oldValue = common.ByteToUint64(oldValueBytes)
 		}
 
 		value = oldValue + 1
 
-		return bucket.Put([]byte(key), database.Uint64ToByte(value))
+		return bucket.Put([]byte(key), common.Uint64ToByte(value))
 	}); err != nil {
 		return 0, err
 	}
@@ -102,14 +106,14 @@ func (d *autoIncrementDB) GetMany(key string, quantity uint64) ([]uint64, error)
 		if oldValueBytes == nil {
 			oldValue = 0
 		} else {
-			oldValue = database.ByteToUint64(oldValueBytes)
+			oldValue = common.ByteToUint64(oldValueBytes)
 		}
 
 		for i := uint64(0); i < quantity; i++ {
 			values[i] = oldValue + i + 1
 		}
 
-		return bucket.Put([]byte(key), database.Uint64ToByte(oldValue+quantity))
+		return bucket.Put([]byte(key), common.Uint64ToByte(oldValue+quantity))
 	}); err != nil {
 		return nil, err
 	}
@@ -135,7 +139,7 @@ func (d *autoIncrementDB) GetLastInserted(key string) (uint64, error) {
 		if oldValueBytes == nil {
 			value = 0
 		} else {
-			value = database.ByteToUint64(oldValueBytes)
+			value = common.ByteToUint64(oldValueBytes)
 		}
 
 		return nil

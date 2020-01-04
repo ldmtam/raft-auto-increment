@@ -1,4 +1,4 @@
-package database
+package common
 
 import (
 	"encoding/binary"

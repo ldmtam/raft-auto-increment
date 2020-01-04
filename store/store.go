@@ -232,7 +232,7 @@ func (s *Store) setupRaft() error {
 		return err
 	}
 
-	ra, err := raft.NewRaft(config, new(raft.MockFSM), logStore, stableStore, snapshotStore, transport)
+	ra, err := raft.NewRaft(config, newFSM(s.db), logStore, stableStore, snapshotStore, transport)
 	if err != nil {
 		return err
 	}
