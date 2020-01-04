@@ -17,6 +17,7 @@ genpb:
 
 run1:
 	go run main.go \
+		--id 1 \
 		--addr localhost:3000 \
 		--raft-addr localhost:5000 \
 		--raft-dir ./tmp/node1/raft \
@@ -25,14 +26,18 @@ run1:
 
 run2:
 	go run main.go \
+		--id 2 \
 		--addr localhost:13000 \
 		--raft-addr localhost:15000 \
+		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node2/raft \
 		--data-dir ./tmp/node2/data \
 
 run3:
 	go run main.go \
+		--id 3 \
 		--addr localhost:23000 \
 		--raft-addr localhost:25000 \
+		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node3/raft \
 		--data-dir ./tmp/node3/data \

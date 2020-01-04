@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -9,11 +10,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
+
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/ldmtam/raft-auto-increment/config"
 	"github.com/ldmtam/raft-auto-increment/database"
 	"github.com/ldmtam/raft-auto-increment/database/boltdb"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -256,6 +260,18 @@ func (s *Store) setupRaft() error {
 		}
 	}
 
+	if s.config.JoinAddr != "" {
+		hasState, err := raft.HasExistingState(logStore, stableStore, snapshotStore)
+		if err != nil {
+			return err
+		}
+		if !hasState {
+			if err := s.joinCluster(); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -280,4 +296,23 @@ func (s *Store) isLeader() bool {
 		return true
 	}
 	return false
+}
+
+func (s *Store) joinCluster() error {
+	conn, err := grpc.Dial(s.config.JoinAddr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pb.NewAutoIncrementClient(conn)
+
+	if _, err := client.Join(context.Background(), &pb.JoinRequest{
+		NodeID:      s.config.NodeID,
+		NodeAddress: s.config.RaftAddr,
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -26,7 +26,7 @@ func init() {
 	flag.StringVar(&dataDir, "data-dir", "./data", "Data directory")
 
 	flag.StringVar(&raftAddr, "raft-addr", "localhost:5000", "Raft address")
-	flag.StringVar(&joinAddr, "join-addr", "localhost:3000", "Leader address")
+	flag.StringVar(&joinAddr, "join-addr", "", "Leader address")
 	flag.StringVar(&raftDir, "raft-dir", "./raft", "Raft directory")
 	flag.BoolVar(&bootstrap, "bootstrap", false, "Start as bootstrap node")
 	flag.StringVar(&nodeID, "id", "1", "Raft node ID")
@@ -40,6 +40,7 @@ func main() {
 		RaftAddr:  raftAddr,
 		RaftDir:   raftDir,
 		Bootstrap: bootstrap,
+		JoinAddr:  joinAddr,
 		Addr:      addr,
 		DataDir:   dataDir,
 	}
