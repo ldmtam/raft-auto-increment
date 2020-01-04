@@ -13,7 +13,7 @@ import (
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/ldmtam/raft-auto-increment/config"
 	"github.com/ldmtam/raft-auto-increment/database"
-	"github.com/ldmtam/raft-auto-increment/database/leveldb"
+	"github.com/ldmtam/raft-auto-increment/database/boltdb"
 )
 
 const (
@@ -44,7 +44,7 @@ func New(config *config.Config) (*Store, error) {
 	}
 	atomic.StoreUint32(store.leader, 0)
 
-	db, err := leveldb.New(store.config.DataDir)
+	db, err := boltdb.New(store.config.DataDir)
 	if err != nil {
 		return nil, err
 	}
@@ -111,12 +111,14 @@ func (s *Store) GetOne(key string) (uint64, error) {
 		return 0, f.Error()
 	}
 
-	resp, ok := f.Response().(*getOneResponse)
-	if !ok {
-		return 0, errors.New("can't assert interface")
+	switch resp := f.Response().(type) {
+	case *fsmGetOneResponse:
+		return resp.value, resp.err
+	case *fsmErrorResponse:
+		return 0, resp.err
+	default:
+		return 0, errors.New("unknown error")
 	}
-
-	return resp.value, resp.err
 }
 
 // GetMany gets number of `quantity` of auto-increment ID for particular key
@@ -143,12 +145,14 @@ func (s *Store) GetMany(key string, quantity uint64) ([]uint64, error) {
 		return nil, f.Error()
 	}
 
-	resp, ok := f.Response().(*getManyResponse)
-	if !ok {
-		return nil, errors.New("can't assert interface")
+	switch resp := f.Response().(type) {
+	case *fsmGetManyResponse:
+		return resp.values, resp.err
+	case *fsmErrorResponse:
+		return nil, resp.err
+	default:
+		return nil, errors.New("unknown error")
 	}
-
-	return resp.values, resp.err
 }
 
 // GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
@@ -174,12 +178,14 @@ func (s *Store) GetLastInserted(key string) (uint64, error) {
 		return 0, f.Error()
 	}
 
-	resp, ok := f.Response().(*getLastInsertedResponse)
-	if !ok {
-		return 0, errors.New("can't assert interface")
+	switch resp := f.Response().(type) {
+	case *fsmGetLastInsertedResponse:
+		return resp.value, resp.err
+	case *fsmErrorResponse:
+		return 0, resp.err
+	default:
+		return 0, errors.New("unknown error")
 	}
-
-	return resp.value, resp.err
 }
 
 // Shutdown shutdowns the store
