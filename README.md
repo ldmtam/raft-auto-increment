@@ -10,7 +10,7 @@ Clone the project:
 go get github.com/ldmtam/raft-auto-increment
 ```
 
-Create `tmp` folder and `node1`, `node2`, `node3` folder inside `tmp`.
+Change directory to `raft-auto-increment`, create `tmp` folder and `node1`, `node2`, `node3` folder inside `tmp`.
 
 Start node 1, this node will be the leader by default.
 ```
