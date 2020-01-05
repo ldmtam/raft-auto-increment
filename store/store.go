@@ -71,7 +71,7 @@ func New(config *config.Config) (*Store, error) {
 
 // Join joins the node given ID, addr to the cluster
 func (s *Store) Join(id, addr string) error {
-	if s.getState() != raft.Leader {
+	if f := s.raft.VerifyLeader(); f.Error() != nil {
 		return raft.ErrNotLeader
 	}
 
@@ -99,7 +99,7 @@ func (s *Store) Join(id, addr string) error {
 
 // GetOne gets next auto-increment ID for particular key
 func (s *Store) GetOne(key string) (uint64, error) {
-	if s.getState() != raft.Leader {
+	if f := s.raft.VerifyLeader(); f.Error() != nil {
 		return 0, raft.ErrNotLeader
 	}
 
@@ -136,7 +136,7 @@ func (s *Store) GetOne(key string) (uint64, error) {
 
 // GetMany gets number of `quantity` of auto-increment ID for particular key
 func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
-	if s.getState() != raft.Leader {
+	if f := s.raft.VerifyLeader(); f.Error() != nil {
 		return 0, 0, raft.ErrNotLeader
 	}
 
@@ -173,7 +173,7 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 
 // GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
 func (s *Store) GetLastInserted(key string) (uint64, error) {
-	if s.getState() != raft.Leader {
+	if f := s.raft.VerifyLeader(); f.Error() != nil {
 		return 0, raft.ErrNotLeader
 	}
 
@@ -181,7 +181,7 @@ func (s *Store) GetLastInserted(key string) (uint64, error) {
 }
 
 func (s *Store) setLeaderInfo() error {
-	if s.getState() != raft.Leader {
+	if f := s.raft.VerifyLeader(); f.Error() != nil {
 		return raft.ErrNotLeader
 	}
 
@@ -295,10 +295,6 @@ func (s *Store) setupRaft() error {
 	}
 
 	return nil
-}
-
-func (s *Store) getState() raft.RaftState {
-	return s.raft.State()
 }
 
 func (s *Store) monitorLeadership() {
