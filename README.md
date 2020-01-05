@@ -1,5 +1,5 @@
 # Raft Auto Increment
-Distributed, fault-tolerant, persistent auto increment service with Raft consensus. <br/>
+Distributed, fault-tolerant, persistent, auto-increment ID generation service with Raft consensus. <br/>
 
 Support both REST API and gRPC.
 
