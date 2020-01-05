@@ -6,8 +6,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"sync"
-	"sync/atomic"
 	"time"
 
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
@@ -30,11 +28,6 @@ const (
 type Store struct {
 	raft *raft.Raft
 
-	leader *uint32
-
-	stopCh chan struct{}
-	wg     sync.WaitGroup
-
 	db     database.AutoIncrement
 	config *config.Config
 }
@@ -43,10 +36,7 @@ type Store struct {
 func New(config *config.Config) (*Store, error) {
 	store := &Store{
 		config: config,
-		leader: new(uint32),
-		stopCh: make(chan struct{}),
 	}
-	atomic.StoreUint32(store.leader, 0)
 
 	db, err := boltdb.New(store.config.DataDir)
 	if err != nil {
@@ -58,15 +48,12 @@ func New(config *config.Config) (*Store, error) {
 		return nil, err
 	}
 
-	store.wg.Add(1)
-	go store.monitorLeadership()
-
 	return store, nil
 }
 
 // Join joins the node given ID, addr to the cluster
 func (s *Store) Join(id, addr string) error {
-	if !s.isLeader() {
+	if s.getState() != raft.Leader {
 		return raft.ErrNotLeader
 	}
 
@@ -94,7 +81,7 @@ func (s *Store) Join(id, addr string) error {
 
 // GetOne gets next auto-increment ID for particular key
 func (s *Store) GetOne(key string) (uint64, error) {
-	if !s.isLeader() {
+	if s.getState() != raft.Leader {
 		return 0, raft.ErrNotLeader
 	}
 
@@ -127,7 +114,7 @@ func (s *Store) GetOne(key string) (uint64, error) {
 
 // GetMany gets number of `quantity` of auto-increment ID for particular key
 func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
-	if !s.isLeader() {
+	if s.getState() != raft.Leader {
 		return 0, 0, raft.ErrNotLeader
 	}
 
@@ -161,7 +148,7 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 
 // GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
 func (s *Store) GetLastInserted(key string) (uint64, error) {
-	if !s.isLeader() {
+	if s.getState() != raft.Leader {
 		return 0, raft.ErrNotLeader
 	}
 
@@ -196,13 +183,11 @@ func (s *Store) GetLastInserted(key string) (uint64, error) {
 func (s *Store) Shutdown() error {
 	s.db.Close()
 
-	close(s.stopCh)
-	s.wg.Wait()
-
 	f := s.raft.Shutdown()
 	if f.Error() != nil {
 		return f.Error()
 	}
+
 	return nil
 }
 
@@ -275,27 +260,8 @@ func (s *Store) setupRaft() error {
 	return nil
 }
 
-func (s *Store) monitorLeadership() {
-	defer s.wg.Done()
-	for {
-		select {
-		case isLeader := <-s.raft.LeaderCh():
-			if isLeader {
-				atomic.StoreUint32(s.leader, 1)
-			} else {
-				atomic.StoreUint32(s.leader, 0)
-			}
-		case <-s.stopCh:
-			return
-		}
-	}
-}
-
-func (s *Store) isLeader() bool {
-	if atomic.LoadUint32(s.leader) == 1 {
-		return true
-	}
-	return false
+func (s *Store) getState() raft.RaftState {
+	return s.raft.State()
 }
 
 func (s *Store) joinCluster() error {
