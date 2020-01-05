@@ -32,48 +32,22 @@ func newFSM(db database.AutoIncrement) *fsm {
 }
 
 func (f *fsm) Apply(l *raft.Log) interface{} {
+	fmt.Printf("Received log with term %v, index %v, payload %v\n", l.Term, l.Index, string(l.Data))
+
 	var cmd command
 	if err := json.Unmarshal(l.Data, &cmd); err != nil {
-		return &fsmErrorResponse{err: fmt.Errorf("failed to unmarshal command: %s", l.Data)}
+		return &fsmResponse{err: fmt.Errorf("failed to unmarshal command: %s", l.Data)}
 	}
 
 	switch cmd.Type {
-	case getOneCmd:
-		var p getOnePayload
+	case setIDCmd:
+		var p setIDPayload
 		if err := json.Unmarshal(cmd.Payload, &p); err != nil {
-			return &fsmErrorResponse{err: fmt.Errorf("failed to unmarshal getOnePayload: %v", cmd.Payload)}
+			return &fsmResponse{err: fmt.Errorf("failed to unmarshal getIDPayload: %v", cmd.Payload)}
 		}
-		value, err := f.db.GetOne(p.Key)
-		return &fsmGetOneResponse{
-			key:   p.Key,
-			value: value,
-			err:   err,
-		}
-	case getManyCmd:
-		var p getManyPayload
-		if err := json.Unmarshal(cmd.Payload, &p); err != nil {
-			return &fsmErrorResponse{err: fmt.Errorf("failed to unmarshal getManyPayload: %v", cmd.Payload)}
-		}
-		from, to, err := f.db.GetMany(p.Key, p.Quantity)
-		return &fsmGetManyResponse{
-			key:  p.Key,
-			from: from,
-			to:   to,
-			err:  err,
-		}
-	case getLastInsertedCmd:
-		var p getLastInsertedPayload
-		if err := json.Unmarshal(cmd.Payload, &p); err != nil {
-			return &fsmErrorResponse{err: fmt.Errorf("failed to unmarshal getLastInsertedPayload: %v", cmd.Payload)}
-		}
-		value, err := f.db.GetLastInserted(p.Key)
-		return &fsmGetLastInsertedResponse{
-			key:   p.Key,
-			value: value,
-			err:   err,
-		}
+		return &fsmResponse{err: f.db.Set(p.Key, p.Value)}
 	default:
-		return &fsmErrorResponse{err: fmt.Errorf("unknown command: %v", cmd)}
+		return &fsmResponse{err: fmt.Errorf("unknown command: %v", cmd)}
 	}
 }
 

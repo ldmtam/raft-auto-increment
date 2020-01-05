@@ -81,3 +81,12 @@ func Test_Backup(t *testing.T) {
 	assert.Nil(t, err)
 	assert.EqualValues(t, inserted, value)
 }
+
+func Test_Set(t *testing.T) {
+	err := testDB.Set("superfoo", 6969)
+	assert.Nil(t, err)
+
+	value, err := testDB.GetLastInserted("superfoo")
+	assert.Nil(t, err)
+	assert.EqualValues(t, 6969, value)
+}

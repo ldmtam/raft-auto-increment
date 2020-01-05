@@ -148,6 +148,22 @@ func (d *autoIncrementDB) GetLastInserted(key string) (uint64, error) {
 	return value, nil
 }
 
+func (d *autoIncrementDB) Set(key string, value uint64) error {
+	return d.db.Batch(func(tx *bolt.Tx) error {
+		bucketName, err := d.getBucket(key)
+		if err != nil {
+			return err
+		}
+
+		bucket := tx.Bucket([]byte(bucketName))
+		if bucket == nil {
+			return fmt.Errorf("%v is nil", bucketName)
+		}
+
+		return bucket.Put([]byte(key), common.Uint64ToByte(value))
+	})
+}
+
 func (d *autoIncrementDB) Backup() ([]byte, error) {
 	var backupBuffer bytes.Buffer
 	backupWriter := bufio.NewWriter(&backupBuffer)

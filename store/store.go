@@ -85,8 +85,14 @@ func (s *Store) GetOne(key string) (uint64, error) {
 		return 0, raft.ErrNotLeader
 	}
 
-	cmd, err := newCommand(getOneCmd, &getOnePayload{
-		Key: key,
+	value, err := s.db.GetOne(key)
+	if err != nil {
+		return 0, err
+	}
+
+	cmd, err := newCommand(setIDCmd, &setIDPayload{
+		Key:   key,
+		Value: value,
 	})
 	if err != nil {
 		return 0, err
@@ -102,14 +108,12 @@ func (s *Store) GetOne(key string) (uint64, error) {
 		return 0, f.Error()
 	}
 
-	switch resp := f.Response().(type) {
-	case *fsmGetOneResponse:
-		return resp.value, resp.err
-	case *fsmErrorResponse:
-		return 0, resp.err
-	default:
+	resp, ok := f.Response().(*fsmResponse)
+	if !ok {
 		return 0, errors.New("unknown error")
 	}
+
+	return value, resp.err
 }
 
 // GetMany gets number of `quantity` of auto-increment ID for particular key
@@ -118,9 +122,14 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 		return 0, 0, raft.ErrNotLeader
 	}
 
-	cmd, err := newCommand(getManyCmd, &getManyPayload{
-		Key:      key,
-		Quantity: quantity,
+	from, to, err := s.db.GetMany(key, quantity)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	cmd, err := newCommand(setIDCmd, &setIDPayload{
+		Key:   key,
+		Value: to,
 	})
 	if err != nil {
 		return 0, 0, err
@@ -136,14 +145,12 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 		return 0, 0, f.Error()
 	}
 
-	switch resp := f.Response().(type) {
-	case *fsmGetManyResponse:
-		return resp.from, resp.to, resp.err
-	case *fsmErrorResponse:
-		return 0, 0, resp.err
-	default:
+	resp, ok := f.Response().(*fsmResponse)
+	if !ok {
 		return 0, 0, errors.New("unknown error")
 	}
+
+	return from, to, resp.err
 }
 
 // GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
@@ -152,31 +159,7 @@ func (s *Store) GetLastInserted(key string) (uint64, error) {
 		return 0, raft.ErrNotLeader
 	}
 
-	cmd, err := newCommand(getLastInsertedCmd, &getLastInsertedPayload{
-		Key: key,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	cmdBytes, err := json.Marshal(cmd)
-	if err != nil {
-		return 0, err
-	}
-
-	f := s.raft.Apply(cmdBytes, applyTimeout)
-	if f.Error() != nil {
-		return 0, f.Error()
-	}
-
-	switch resp := f.Response().(type) {
-	case *fsmGetLastInsertedResponse:
-		return resp.value, resp.err
-	case *fsmErrorResponse:
-		return 0, resp.err
-	default:
-		return 0, errors.New("unknown error")
-	}
+	return s.db.GetLastInserted(key)
 }
 
 // Shutdown shutdowns the store
@@ -193,6 +176,7 @@ func (s *Store) Shutdown() error {
 
 func (s *Store) setupRaft() error {
 	config := raft.DefaultConfig()
+	config.LogLevel = "INFO"
 	config.LocalID = raft.ServerID(s.config.NodeID)
 
 	transport, err := raft.NewTCPTransport(s.config.RaftAddr, nil, 3, 10*time.Second, os.Stderr)

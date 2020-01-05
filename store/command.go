@@ -7,9 +7,7 @@ import (
 type commandType int
 
 const (
-	getOneCmd commandType = iota
-	getManyCmd
-	getLastInsertedCmd
+	setIDCmd commandType = iota + 1
 )
 
 type command struct {
@@ -28,15 +26,7 @@ func newCommand(t commandType, p interface{}) (*command, error) {
 	}, nil
 }
 
-type getOnePayload struct {
-	Key string `json:"key,omitempty"`
-}
-
-type getManyPayload struct {
-	Key      string `json:"key,omitempty"`
-	Quantity uint64 `json:"quantity,omitempty"`
-}
-
-type getLastInsertedPayload struct {
-	Key string `json:"key,omitempty"`
+type setIDPayload struct {
+	Key   string `json:"key,omitempty"`
+	Value uint64 `json:"value,omitempty"`
 }
