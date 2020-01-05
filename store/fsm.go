@@ -20,6 +20,7 @@ import (
 
 type fsm struct {
 	db     database.AutoIncrement
+	store  *Store
 	config *config.Config
 }
 
@@ -27,8 +28,11 @@ type fsmSnapshot struct {
 	data []byte
 }
 
-func newFSM(db database.AutoIncrement) *fsm {
-	return &fsm{db: db}
+func newFSM(db database.AutoIncrement, store *Store) *fsm {
+	return &fsm{
+		db:    db,
+		store: store,
+	}
 }
 
 func (f *fsm) Apply(l *raft.Log) interface{} {
@@ -46,6 +50,17 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 			return &fsmResponse{err: fmt.Errorf("failed to unmarshal getIDPayload: %v", cmd.Payload)}
 		}
 		return &fsmResponse{err: f.db.Set(p.Key, p.Value)}
+	case setLeaderInfoCmd:
+		var p setLeaderInfoPayload
+		if err := json.Unmarshal(cmd.Payload, &p); err != nil {
+			return &fsmResponse{err: err}
+		}
+		f.store.leader = &leaderInfo{
+			NodeAddr: p.NodeAddr,
+			RaftAddr: p.RaftAddr,
+			RaftID:   p.RaftID,
+		}
+		return &fsmResponse{err: nil}
 	default:
 		return &fsmResponse{err: fmt.Errorf("unknown command: %v", cmd)}
 	}

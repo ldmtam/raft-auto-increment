@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
@@ -24,9 +26,20 @@ const (
 	applyTimeout        = 10 * time.Second
 )
 
+type leaderInfo struct {
+	NodeAddr string
+	RaftAddr string
+	RaftID   string
+}
+
 // Store represents the Store structure
 type Store struct {
 	raft *raft.Raft
+
+	leader *leaderInfo
+
+	shutdownCh chan struct{}
+	wg         sync.WaitGroup
 
 	db     database.AutoIncrement
 	config *config.Config
@@ -35,7 +48,9 @@ type Store struct {
 // New return new instance of Store object
 func New(config *config.Config) (*Store, error) {
 	store := &Store{
-		config: config,
+		config:     config,
+		leader:     new(leaderInfo),
+		shutdownCh: make(chan struct{}),
 	}
 
 	db, err := boltdb.New(store.config.DataDir)
@@ -47,6 +62,9 @@ func New(config *config.Config) (*Store, error) {
 	if err := store.setupRaft(); err != nil {
 		return nil, err
 	}
+
+	store.wg.Add(1)
+	go store.monitorLeadership()
 
 	return store, nil
 }
@@ -162,9 +180,44 @@ func (s *Store) GetLastInserted(key string) (uint64, error) {
 	return s.db.GetLastInserted(key)
 }
 
+func (s *Store) setLeaderInfo() error {
+	if s.getState() != raft.Leader {
+		return raft.ErrNotLeader
+	}
+
+	cmd, err := newCommand(setLeaderInfoCmd, &setLeaderInfoPayload{
+		NodeAddr: s.config.Addr,
+		RaftAddr: s.config.RaftAddr,
+		RaftID:   s.config.NodeID,
+	})
+	if err != nil {
+		return err
+	}
+
+	cmdBytes, err := json.Marshal(cmd)
+	if err != nil {
+		return err
+	}
+
+	f := s.raft.Apply(cmdBytes, applyTimeout)
+	if f.Error() != nil {
+		return f.Error()
+	}
+
+	resp, ok := f.Response().(*fsmResponse)
+	if !ok {
+		return errors.New("unknown error")
+	}
+
+	return resp.err
+}
+
 // Shutdown shutdowns the store
 func (s *Store) Shutdown() error {
 	s.db.Close()
+
+	close(s.shutdownCh)
+	s.wg.Wait()
 
 	f := s.raft.Shutdown()
 	if f.Error() != nil {
@@ -205,7 +258,7 @@ func (s *Store) setupRaft() error {
 		return err
 	}
 
-	ra, err := raft.NewRaft(config, newFSM(s.db), logStore, stableStore, snapshotStore, transport)
+	ra, err := raft.NewRaft(config, newFSM(s.db, s), logStore, stableStore, snapshotStore, transport)
 	if err != nil {
 		return err
 	}
@@ -246,6 +299,22 @@ func (s *Store) setupRaft() error {
 
 func (s *Store) getState() raft.RaftState {
 	return s.raft.State()
+}
+
+func (s *Store) monitorLeadership() {
+	defer s.wg.Done()
+	for {
+		select {
+		case leader := <-s.raft.LeaderCh():
+			if leader {
+				if err := s.setLeaderInfo(); err != nil {
+					fmt.Println(err)
+				}
+			}
+		case <-s.shutdownCh:
+			return
+		}
+	}
 }
 
 func (s *Store) joinCluster() error {
