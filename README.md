@@ -14,12 +14,12 @@ go get github.com/ldmtam/raft-auto-increment
 
 Change directory to `raft-auto-increment`, create `tmp` folder and `node1`, `node2`, `node3` folder inside `tmp`.
 
-Start node 1, this node will be the leader by default.
+Start node 1, this node will be the leader by default. Node 1 will serve requests at port `3000`.
 ```
 make run1
 ```
 
-Start other 2 nodes by running following commands, these 2 nodes will be slaves to node 1
+Start other 2 nodes by running following commands, these 2 nodes will be slaves to node 1, serve requests at port 13000 and 23000 respectively.
 ```
 make run2
 make run3
@@ -38,4 +38,14 @@ curl http://localhost:3000/auto-increment/last-inserted/foo
 Get next 10 available IDs for key `bar`:
 ```
 curl http://localhost:3000/auto-increment/many/bar/10
+```
+
+You can send request to `node 2` and `node 3` as well. Requests will be automatically forwarded to master node (`node 1`),
+```
+curl http://localhost:13000/auto-increment/one/bar
+```
+
+```
+curl http://localhost:23000/auto-increment/last-inserted/bar
+
 ```
