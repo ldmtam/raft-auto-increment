@@ -14,12 +14,12 @@ go get github.com/ldmtam/raft-auto-increment
 
 Change directory to `raft-auto-increment`, create `tmp` folder and `node1`, `node2`, `node3` folder inside `tmp`.
 
-Start node 1, this node will be the leader by default. Node 1 will serve requests at port `3000`.
+Start `node 1`, this node will be the leader by default. `node 1` will serve requests at port `3000`.
 ```
 make run1
 ```
 
-Start other 2 nodes by running following commands, these 2 nodes will be slaves to node 1, serve requests at port 13000 and 23000 respectively.
+Start other 2 nodes by running following commands. `node 2` and `node 3` will be slaves of `node 1` and serve requests at port `13000`, `23000` respectively.
 ```
 make run2
 make run3
