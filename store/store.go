@@ -36,7 +36,8 @@ type leaderInfo struct {
 type Store struct {
 	raft *raft.Raft
 
-	leader *leaderInfo
+	leader     *leaderInfo
+	leaderConn *grpc.ClientConn
 
 	shutdownCh chan struct{}
 	wg         sync.WaitGroup
@@ -72,7 +73,7 @@ func New(config *config.Config) (*Store, error) {
 // Join joins the node given ID, addr to the cluster
 func (s *Store) Join(id, addr string) error {
 	if f := s.raft.VerifyLeader(); f.Error() != nil {
-		return raft.ErrNotLeader
+		return s.forwardJoinRequest(id, addr)
 	}
 
 	configFuture := s.raft.GetConfiguration()
@@ -100,7 +101,7 @@ func (s *Store) Join(id, addr string) error {
 // GetOne gets next auto-increment ID for particular key
 func (s *Store) GetOne(key string) (uint64, error) {
 	if f := s.raft.VerifyLeader(); f.Error() != nil {
-		return 0, raft.ErrNotLeader
+		return s.forwardGetOneRequest(key)
 	}
 
 	value, err := s.db.GetOne(key)
@@ -137,7 +138,7 @@ func (s *Store) GetOne(key string) (uint64, error) {
 // GetMany gets number of `quantity` of auto-increment ID for particular key
 func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 	if f := s.raft.VerifyLeader(); f.Error() != nil {
-		return 0, 0, raft.ErrNotLeader
+		return s.forwardGetManyRequest(key, quantity)
 	}
 
 	from, to, err := s.db.GetMany(key, quantity)
@@ -174,7 +175,7 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 // GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
 func (s *Store) GetLastInserted(key string) (uint64, error) {
 	if f := s.raft.VerifyLeader(); f.Error() != nil {
-		return 0, raft.ErrNotLeader
+		return s.forwardGetLastInsertedRequest(key)
 	}
 
 	return s.db.GetLastInserted(key)
@@ -214,6 +215,10 @@ func (s *Store) setLeaderInfo() error {
 
 // Shutdown shutdowns the store
 func (s *Store) Shutdown() error {
+	if s.leaderConn != nil {
+		s.leaderConn.Close()
+	}
+
 	s.db.Close()
 
 	close(s.shutdownCh)
@@ -330,4 +335,89 @@ func (s *Store) joinCluster() error {
 	}
 
 	return nil
+}
+
+func (s *Store) forwardJoinRequest(raftID, raftAddr string) error {
+	var err error
+
+	if s.leaderConn == nil {
+		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return err
+		}
+	}
+
+	client := pb.NewAutoIncrementClient(s.leaderConn)
+
+	if _, err := client.Join(context.Background(), &pb.JoinRequest{
+		NodeID:      raftID,
+		NodeAddress: raftAddr,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) forwardGetOneRequest(key string) (uint64, error) {
+	var err error
+
+	if s.leaderConn == nil {
+		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	client := pb.NewAutoIncrementClient(s.leaderConn)
+
+	resp, err := client.GetOne(context.Background(), &pb.GetOneRequest{Key: key})
+	if err != nil {
+		return 0, err
+	}
+
+	return resp.Value, nil
+}
+
+func (s *Store) forwardGetManyRequest(key string, quantity uint64) (uint64, uint64, error) {
+	var err error
+
+	if s.leaderConn == nil {
+		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+
+	client := pb.NewAutoIncrementClient(s.leaderConn)
+
+	resp, err := client.GetMany(context.Background(), &pb.GetManyRequest{
+		Key:      key,
+		Quantity: quantity,
+	})
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return resp.From, resp.To, nil
+}
+
+func (s *Store) forwardGetLastInsertedRequest(key string) (uint64, error) {
+	var err error
+
+	if s.leaderConn == nil {
+		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	client := pb.NewAutoIncrementClient(s.leaderConn)
+
+	resp, err := client.GetLastInserted(context.Background(), &pb.GetLastInsertedRequest{Key: key})
+	if err != nil {
+		return 0, err
+	}
+
+	return resp.Value, nil
 }

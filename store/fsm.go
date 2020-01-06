@@ -60,6 +60,10 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 			RaftAddr: p.RaftAddr,
 			RaftID:   p.RaftID,
 		}
+		// close connection to old leader, if exists.
+		if f.store.leaderConn != nil {
+			f.store.leaderConn.Close()
+		}
 		return &fsmResponse{err: nil}
 	default:
 		return &fsmResponse{err: fmt.Errorf("unknown command: %v", cmd)}
