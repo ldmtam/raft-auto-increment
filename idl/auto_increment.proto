@@ -59,8 +59,8 @@ message GetLastInsertedResponse {
 }
 
 message JoinRequest {
-    string nodeID = 1;
-    string nodeAddress = 2;
+    string raftID = 1;
+    string raftAddress = 2;
 }
 
 message JoinResponse {

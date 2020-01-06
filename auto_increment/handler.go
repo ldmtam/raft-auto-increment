@@ -38,7 +38,7 @@ func (ai *AutoIncrement) GetLastInserted(ctx context.Context, req *pb.GetLastIns
 
 // Join ...
 func (ai *AutoIncrement) Join(ctx context.Context, req *pb.JoinRequest) (*pb.JoinResponse, error) {
-	err := ai.store.Join(req.NodeID, req.NodeAddress)
+	err := ai.store.Join(req.RaftID, req.RaftAddress)
 	if err != nil {
 		return nil, err
 	}

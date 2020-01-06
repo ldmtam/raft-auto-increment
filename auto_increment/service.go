@@ -59,7 +59,7 @@ func New(config *config.Config) (*AutoIncrement, error) {
 	}
 	ai.store = store
 
-	listener, err := net.Listen("tcp", config.Addr)
+	listener, err := net.Listen("tcp", config.NodeAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func New(config *config.Config) (*AutoIncrement, error) {
 
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, ai.config.Addr, opts); err != nil {
+	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, ai.config.NodeAddr, opts); err != nil {
 		return nil, err
 	}
 

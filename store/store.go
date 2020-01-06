@@ -187,9 +187,9 @@ func (s *Store) setLeaderInfo() error {
 	}
 
 	cmd, err := newCommand(setLeaderInfoCmd, &setLeaderInfoPayload{
-		NodeAddr: s.config.Addr,
+		NodeAddr: s.config.NodeAddr,
 		RaftAddr: s.config.RaftAddr,
-		RaftID:   s.config.NodeID,
+		RaftID:   s.config.RaftID,
 	})
 	if err != nil {
 		return err
@@ -235,7 +235,7 @@ func (s *Store) Shutdown() error {
 func (s *Store) setupRaft() error {
 	config := raft.DefaultConfig()
 	config.LogLevel = "INFO"
-	config.LocalID = raft.ServerID(s.config.NodeID)
+	config.LocalID = raft.ServerID(s.config.RaftID)
 
 	transport, err := raft.NewTCPTransport(s.config.RaftAddr, nil, 3, 10*time.Second, os.Stderr)
 	if err != nil {
@@ -328,8 +328,8 @@ func (s *Store) joinCluster() error {
 	client := pb.NewAutoIncrementClient(conn)
 
 	if _, err := client.Join(context.Background(), &pb.JoinRequest{
-		NodeID:      s.config.NodeID,
-		NodeAddress: s.config.RaftAddr,
+		RaftID:      s.config.RaftID,
+		RaftAddress: s.config.RaftAddr,
 	}); err != nil {
 		return err
 	}
@@ -350,8 +350,8 @@ func (s *Store) forwardJoinRequest(raftID, raftAddr string) error {
 	client := pb.NewAutoIncrementClient(s.leaderConn)
 
 	if _, err := client.Join(context.Background(), &pb.JoinRequest{
-		NodeID:      raftID,
-		NodeAddress: raftAddr,
+		RaftID:      raftID,
+		RaftAddress: raftAddr,
 	}); err != nil {
 		return err
 	}

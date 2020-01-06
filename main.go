@@ -11,37 +11,37 @@ import (
 )
 
 var (
-	addr    string
-	dataDir string
+	nodeAddr string
+	dataDir  string
 
 	raftAddr  string
 	joinAddr  string
 	raftDir   string
 	bootstrap bool
-	nodeID    string
+	raftID    string
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", "localhost:3000", "Service grpc/http address")
+	flag.StringVar(&nodeAddr, "node-addr", "localhost:3000", "Service grpc/http address")
 	flag.StringVar(&dataDir, "data-dir", "./data", "Data directory")
 
 	flag.StringVar(&raftAddr, "raft-addr", "localhost:5000", "Raft address")
 	flag.StringVar(&joinAddr, "join-addr", "", "Leader address")
 	flag.StringVar(&raftDir, "raft-dir", "./raft", "Raft directory")
 	flag.BoolVar(&bootstrap, "bootstrap", false, "Start as bootstrap node")
-	flag.StringVar(&nodeID, "id", "1", "Raft node ID")
+	flag.StringVar(&raftID, "raft-id", "1", "Raft node ID")
 }
 
 func main() {
 	flag.Parse()
 
 	config := &config.Config{
-		NodeID:    nodeID,
+		RaftID:    raftID,
 		RaftAddr:  raftAddr,
 		RaftDir:   raftDir,
 		Bootstrap: bootstrap,
 		JoinAddr:  joinAddr,
-		Addr:      addr,
+		NodeAddr:  nodeAddr,
 		DataDir:   dataDir,
 	}
 
