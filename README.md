@@ -1,7 +1,9 @@
 # Raft Auto Increment
 Distributed, fault-tolerant, persistent, auto-increment ID generation service with Raft consensus. <br/>
 
-Support both REST API and gRPC.
+Support both REST API and gRPC. <br/>
+
+Multiple storage engines are supported: `bolt` and `badger`. Please consider using `badger` for better performance.
 
 # What is Raft consensus?
 Please refer to this [page](https://raft.github.io/) for more detail.
