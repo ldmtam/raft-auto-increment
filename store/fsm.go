@@ -65,6 +65,7 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 		// close connection to old leader, if exists.
 		if f.store.leaderConn != nil {
 			f.store.leaderConn.Close()
+			f.store.leaderConn = nil
 		}
 		return &fsmResponse{err: nil}
 	default:
