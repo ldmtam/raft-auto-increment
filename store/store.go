@@ -10,6 +10,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ldmtam/raft-auto-increment/common"
+	"github.com/ldmtam/raft-auto-increment/database/badgerdb"
+
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
 
 	"github.com/hashicorp/raft"
@@ -48,17 +51,28 @@ type Store struct {
 
 // New return new instance of Store object
 func New(config *config.Config) (*Store, error) {
+	var err error
+
 	store := &Store{
 		config:     config,
 		leader:     new(leaderInfo),
 		shutdownCh: make(chan struct{}),
 	}
 
-	db, err := boltdb.New(store.config.DataDir)
-	if err != nil {
-		return nil, err
+	switch config.Storage {
+	case common.BOLT_STORAGE:
+		store.db, err = boltdb.New(store.config.DataDir)
+		if err != nil {
+			return nil, err
+		}
+	case common.BADGER_STORAGE:
+		store.db, err = badgerdb.New(store.config.DataDir, nil)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, errors.New("storage is not available")
 	}
-	store.db = db
 
 	if err := store.setupRaft(); err != nil {
 		return nil, err

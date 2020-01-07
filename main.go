@@ -13,6 +13,7 @@ import (
 var (
 	nodeAddr string
 	dataDir  string
+	storage  string
 
 	raftAddr  string
 	joinAddr  string
@@ -24,6 +25,7 @@ var (
 func init() {
 	flag.StringVar(&nodeAddr, "node-addr", "localhost:3000", "Service grpc/http address")
 	flag.StringVar(&dataDir, "data-dir", "./data", "Data directory")
+	flag.StringVar(&storage, "storage", "badger", "Storage engine")
 
 	flag.StringVar(&raftAddr, "raft-addr", "localhost:5000", "Raft address")
 	flag.StringVar(&joinAddr, "join-addr", "", "Leader address")
@@ -38,6 +40,7 @@ func main() {
 	config := &config.Config{
 		RaftID:    raftID,
 		RaftAddr:  raftAddr,
+		Storage:   storage,
 		RaftDir:   raftDir,
 		Bootstrap: bootstrap,
 		JoinAddr:  joinAddr,

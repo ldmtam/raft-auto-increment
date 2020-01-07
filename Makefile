@@ -22,6 +22,7 @@ run1:
 		--raft-addr localhost:5000 \
 		--raft-dir ./tmp/node1/raft \
 		--data-dir ./tmp/node1/data \
+		--storage badger \
 		--bootstrap true
 
 run2:
@@ -32,6 +33,7 @@ run2:
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node2/raft \
 		--data-dir ./tmp/node2/data \
+		--storage badger
 
 run3:
 	go run main.go \
@@ -41,3 +43,4 @@ run3:
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node3/raft \
 		--data-dir ./tmp/node3/data \
+		--storage badger

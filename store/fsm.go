@@ -1,12 +1,15 @@
 package store
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/ldmtam/raft-auto-increment/database/badgerdb"
 
 	"github.com/ldmtam/raft-auto-increment/common"
 
@@ -19,9 +22,8 @@ import (
 )
 
 type fsm struct {
-	db     database.AutoIncrement
-	store  *Store
-	config *config.Config
+	db    database.AutoIncrement
+	store *Store
 }
 
 type fsmSnapshot struct {
@@ -71,6 +73,7 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
+	fmt.Println("Starting snapshot")
 	var err error
 	snapshot := &fsmSnapshot{}
 
@@ -98,16 +101,24 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(f.config.DataDir, config.DB_FILE_NAME), database, 0777); err != nil {
-		return err
+	var err error
+
+	switch f.store.config.Storage {
+	case common.BOLT_STORAGE:
+		if err = ioutil.WriteFile(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME), database, 0777); err != nil {
+			return err
+		}
+		f.db, err = boltdb.New(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME))
+	case common.BADGER_STORAGE:
+		r := bytes.NewReader(database)
+		f.db, err = badgerdb.New(f.store.config.DataDir, r)
+	default:
+		return common.ErrStorageNotAvailable
 	}
 
-	db, err := boltdb.New(filepath.Join(f.config.DataDir, config.DB_FILE_NAME))
 	if err != nil {
 		return err
 	}
-
-	f.db = db
 
 	return nil
 }
@@ -136,11 +147,17 @@ func (snapshot *fsmSnapshot) Persist(sink raft.SnapshotSink) error {
 func (snapshot *fsmSnapshot) Release() {}
 
 func (f *fsm) removeOldData() error {
-	// Close the boltDB
+	// Close the boltDB or badgerDB
 	if err := f.db.Close(); err != nil {
 		return err
 	}
 
-	// Remove physical boltDB file on disk
-	return os.Remove(filepath.Join(f.config.DataDir, config.DB_FILE_NAME))
+	switch f.store.config.Storage {
+	case common.BOLT_STORAGE:
+		return os.Remove(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME))
+	case common.BADGER_STORAGE:
+		return os.RemoveAll(f.store.config.DataDir)
+	default:
+		return common.ErrStorageNotAvailable
+	}
 }

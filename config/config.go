@@ -10,6 +10,8 @@ type Config struct {
 
 	DataDir  string
 	NodeAddr string
+
+	Storage string
 }
 
 const (
