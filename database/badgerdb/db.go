@@ -43,65 +43,6 @@ func New(path string, backup io.Reader) (database.AutoIncrement, error) {
 	}, nil
 }
 
-func (d *autoIncrementDB) GetOne(key string) (uint64, error) {
-	var value uint64
-
-	if err := d.db.Update(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil && err != badger.ErrKeyNotFound {
-			return err
-		}
-
-		if err == badger.ErrKeyNotFound {
-			value = 1
-		} else {
-			oldValueBytes, err := item.ValueCopy(nil)
-			if err != nil {
-				return err
-			}
-
-			value = common.ByteToUint64(oldValueBytes) + 1
-		}
-
-		return txn.Set([]byte(key), common.Uint64ToByte(value))
-	}); err != nil {
-		return 0, err
-	}
-
-	return value, nil
-}
-
-func (d *autoIncrementDB) GetMany(key string, quantity uint64) (uint64, uint64, error) {
-	var from, to uint64
-
-	if err := d.db.Update(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil && err != badger.ErrKeyNotFound {
-			return err
-		}
-
-		var oldValue uint64
-		if err == badger.ErrKeyNotFound {
-			oldValue = 0
-		} else {
-			oldValueBytes, err := item.ValueCopy(nil)
-			if err != nil {
-				return err
-			}
-
-			oldValue = common.ByteToUint64(oldValueBytes)
-		}
-
-		from, to = oldValue+1, oldValue+quantity
-
-		return txn.Set([]byte(key), common.Uint64ToByte(to))
-	}); err != nil {
-		return 0, 0, err
-	}
-
-	return from, to, nil
-}
-
 func (d *autoIncrementDB) GetLastInserted(key string) (uint64, error) {
 	var value uint64
 

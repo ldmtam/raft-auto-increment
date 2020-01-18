@@ -28,8 +28,8 @@ func newCommand(t commandType, p interface{}) (*command, error) {
 }
 
 type setIDPayload struct {
-	Key   string `json:"key,omitempty"`
-	Value uint64 `json:"value,omitempty"`
+	Key      string `json:"key,omitempty"`
+	Quantity uint64 `json:"quantity,omitempty"`
 }
 
 type setLeaderInfoPayload struct {

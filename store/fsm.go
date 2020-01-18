@@ -51,7 +51,33 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 		if err := json.Unmarshal(cmd.Payload, &p); err != nil {
 			return &fsmResponse{err: fmt.Errorf("failed to unmarshal getIDPayload: %v", cmd.Payload)}
 		}
-		return &fsmResponse{err: f.db.Set(p.Key, p.Value)}
+		lastInserted, err := f.db.GetLastInserted(p.Key)
+		if err != nil {
+			return &fsmResponse{err: err, resp: nil}
+		}
+		if err := f.db.Set(p.Key, lastInserted+p.Quantity); err != nil {
+			return &fsmResponse{err: err, resp: nil}
+		}
+		var resp *fsmResponse
+		if p.Quantity == 1 {
+			resp = &fsmResponse{
+				resp: &getOneIDResponse{
+					key:   p.Key,
+					value: lastInserted + p.Quantity,
+				},
+				err: nil,
+			}
+		} else {
+			resp = &fsmResponse{
+				resp: &getManyIDsResponse{
+					key:  p.Key,
+					from: lastInserted + 1,
+					to:   lastInserted + p.Quantity,
+				},
+				err: nil,
+			}
+		}
+		return resp
 	case setLeaderInfoCmd:
 		var p setLeaderInfoPayload
 		if err := json.Unmarshal(cmd.Payload, &p); err != nil {

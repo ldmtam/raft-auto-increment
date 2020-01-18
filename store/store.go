@@ -59,6 +59,10 @@ func New(config *config.Config) (*Store, error) {
 		shutdownCh: make(chan struct{}),
 	}
 
+	if err := os.RemoveAll(store.config.DataDir); err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+
 	switch config.Storage {
 	case common.BOLT_STORAGE:
 		store.db, err = boltdb.New(store.config.DataDir)
@@ -118,14 +122,9 @@ func (s *Store) GetOne(key string) (uint64, error) {
 		return s.forwardGetOneRequest(key)
 	}
 
-	value, err := s.db.GetOne(key)
-	if err != nil {
-		return 0, err
-	}
-
 	cmd, err := newCommand(setIDCmd, &setIDPayload{
-		Key:   key,
-		Value: value,
+		Key:      key,
+		Quantity: 1,
 	})
 	if err != nil {
 		return 0, err
@@ -141,12 +140,20 @@ func (s *Store) GetOne(key string) (uint64, error) {
 		return 0, f.Error()
 	}
 
-	resp, ok := f.Response().(*fsmResponse)
+	raftResp, ok := f.Response().(*fsmResponse)
+	if !ok {
+		return 0, errors.New("unknown error")
+	}
+	if raftResp.err != nil {
+		return 0, err
+	}
+
+	getOneResp, ok := raftResp.resp.(*getOneIDResponse)
 	if !ok {
 		return 0, errors.New("unknown error")
 	}
 
-	return value, resp.err
+	return getOneResp.value, nil
 }
 
 // GetMany gets number of `quantity` of auto-increment ID for particular key
@@ -155,14 +162,9 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 		return s.forwardGetManyRequest(key, quantity)
 	}
 
-	from, to, err := s.db.GetMany(key, quantity)
-	if err != nil {
-		return 0, 0, err
-	}
-
 	cmd, err := newCommand(setIDCmd, &setIDPayload{
-		Key:   key,
-		Value: to,
+		Key:      key,
+		Quantity: quantity,
 	})
 	if err != nil {
 		return 0, 0, err
@@ -178,12 +180,20 @@ func (s *Store) GetMany(key string, quantity uint64) (uint64, uint64, error) {
 		return 0, 0, f.Error()
 	}
 
-	resp, ok := f.Response().(*fsmResponse)
+	raftResp, ok := f.Response().(*fsmResponse)
+	if !ok {
+		return 0, 0, errors.New("unknown error")
+	}
+	if raftResp.err != nil {
+		return 0, 0, raftResp.err
+	}
+
+	getManyResp, ok := raftResp.resp.(*getManyIDsResponse)
 	if !ok {
 		return 0, 0, errors.New("unknown error")
 	}
 
-	return from, to, resp.err
+	return getManyResp.from, getManyResp.to, nil
 }
 
 // GetLastInserted gets the last inserted id for particular key. This API doesn't change database.
