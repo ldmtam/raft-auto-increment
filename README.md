@@ -3,7 +3,7 @@ Distributed, fault-tolerant, persistent, auto-increment ID generation service wi
 
 Support both REST API and gRPC. <br/>
 
-Multiple storage engines are supported: `bolt` and `badger`. Please consider using `badger` for better performance.
+Multiple storage engines are supported: `bolt`, `badger` and `in-memory`. Please consider using `in-memory` for better performance because Raft automatically persists committed logs so you can replay those even after a crash.
 
 # What is Raft consensus?
 Please refer to this [page](https://raft.github.io/) for more detail.
