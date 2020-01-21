@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ldmtam/raft-auto-increment/database/memdb"
+
 	"github.com/ldmtam/raft-auto-increment/database/badgerdb"
 
 	"github.com/ldmtam/raft-auto-increment/common"
@@ -139,6 +141,8 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 	case common.BADGER_STORAGE:
 		r := bytes.NewReader(database)
 		f.db, err = badgerdb.New(f.store.config.DataDir, r)
+	case common.MEMORY_STORAGE:
+		f.db, err = memdb.New(database)
 	default:
 		return common.ErrStorageNotAvailable
 	}
@@ -184,6 +188,8 @@ func (f *fsm) removeOldData() error {
 		return os.Remove(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME))
 	case common.BADGER_STORAGE:
 		return os.RemoveAll(f.store.config.DataDir)
+	case common.MEMORY_STORAGE:
+		return nil
 	default:
 		return common.ErrStorageNotAvailable
 	}

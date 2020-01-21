@@ -12,6 +12,7 @@ import (
 
 	"github.com/ldmtam/raft-auto-increment/common"
 	"github.com/ldmtam/raft-auto-increment/database/badgerdb"
+	"github.com/ldmtam/raft-auto-increment/database/memdb"
 
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
 
@@ -71,6 +72,11 @@ func New(config *config.Config) (*Store, error) {
 		}
 	case common.BADGER_STORAGE:
 		store.db, err = badgerdb.New(store.config.DataDir, nil)
+		if err != nil {
+			return nil, err
+		}
+	case common.MEMORY_STORAGE:
+		store.db, err = memdb.New(nil)
 		if err != nil {
 			return nil, err
 		}
