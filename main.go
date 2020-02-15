@@ -12,7 +12,6 @@ import (
 
 var (
 	nodeAddr string
-	dataDir  string
 	storage  string
 
 	raftAddr  string
@@ -24,7 +23,6 @@ var (
 
 func init() {
 	flag.StringVar(&nodeAddr, "node-addr", "localhost:3000", "Service grpc/http address")
-	flag.StringVar(&dataDir, "data-dir", "./data", "Data directory")
 	flag.StringVar(&storage, "storage", "badger", "Storage engine")
 
 	flag.StringVar(&raftAddr, "raft-addr", "localhost:5000", "Raft address")
@@ -45,7 +43,6 @@ func main() {
 		Bootstrap: bootstrap,
 		JoinAddr:  joinAddr,
 		NodeAddr:  nodeAddr,
-		DataDir:   dataDir,
 	}
 
 	service, err := autoIncrement.New(config)

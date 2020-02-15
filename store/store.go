@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ldmtam/raft-auto-increment/common"
-	"github.com/ldmtam/raft-auto-increment/database/badgerdb"
 	"github.com/ldmtam/raft-auto-increment/database/memdb"
 
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
@@ -20,7 +18,6 @@ import (
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/ldmtam/raft-auto-increment/config"
 	"github.com/ldmtam/raft-auto-increment/database"
-	"github.com/ldmtam/raft-auto-increment/database/boltdb"
 	"google.golang.org/grpc"
 )
 
@@ -60,28 +57,9 @@ func New(config *config.Config) (*Store, error) {
 		shutdownCh: make(chan struct{}),
 	}
 
-	if err := os.RemoveAll(store.config.DataDir); err != nil && !os.IsNotExist(err) {
+	store.db, err = memdb.New(nil)
+	if err != nil {
 		return nil, err
-	}
-
-	switch config.Storage {
-	case common.BOLT_STORAGE:
-		store.db, err = boltdb.New(store.config.DataDir)
-		if err != nil {
-			return nil, err
-		}
-	case common.BADGER_STORAGE:
-		store.db, err = badgerdb.New(store.config.DataDir, nil)
-		if err != nil {
-			return nil, err
-		}
-	case common.MEMORY_STORAGE:
-		store.db, err = memdb.New(nil)
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return nil, errors.New("storage is not available")
 	}
 
 	if err := store.setupRaft(); err != nil {

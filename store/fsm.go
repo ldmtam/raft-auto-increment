@@ -1,23 +1,13 @@
 package store
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 
 	"github.com/ldmtam/raft-auto-increment/database/memdb"
 
-	"github.com/ldmtam/raft-auto-increment/database/badgerdb"
-
 	"github.com/ldmtam/raft-auto-increment/common"
-
-	"github.com/ldmtam/raft-auto-increment/database/boltdb"
-
-	"github.com/ldmtam/raft-auto-increment/config"
 
 	"github.com/hashicorp/raft"
 	"github.com/ldmtam/raft-auto-increment/database"
@@ -115,10 +105,6 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 }
 
 func (f *fsm) Restore(rc io.ReadCloser) error {
-	if err := f.removeOldData(); err != nil {
-		return err
-	}
-
 	sizeBytes := make([]byte, 8)
 	if _, err := io.ReadFull(rc, sizeBytes); err != nil {
 		return err
@@ -132,21 +118,7 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 
 	var err error
 
-	switch f.store.config.Storage {
-	case common.BOLT_STORAGE:
-		if err = ioutil.WriteFile(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME), database, 0777); err != nil {
-			return err
-		}
-		f.db, err = boltdb.New(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME))
-	case common.BADGER_STORAGE:
-		r := bytes.NewReader(database)
-		f.db, err = badgerdb.New(f.store.config.DataDir, r)
-	case common.MEMORY_STORAGE:
-		f.db, err = memdb.New(database)
-	default:
-		return common.ErrStorageNotAvailable
-	}
-
+	f.db, err = memdb.New(database)
 	if err != nil {
 		return err
 	}
@@ -176,21 +148,3 @@ func (snapshot *fsmSnapshot) Persist(sink raft.SnapshotSink) error {
 }
 
 func (snapshot *fsmSnapshot) Release() {}
-
-func (f *fsm) removeOldData() error {
-	// Close the boltDB or badgerDB
-	if err := f.db.Close(); err != nil {
-		return err
-	}
-
-	switch f.store.config.Storage {
-	case common.BOLT_STORAGE:
-		return os.Remove(filepath.Join(f.store.config.DataDir, config.DB_FILE_NAME))
-	case common.BADGER_STORAGE:
-		return os.RemoveAll(f.store.config.DataDir)
-	case common.MEMORY_STORAGE:
-		return nil
-	default:
-		return common.ErrStorageNotAvailable
-	}
-}

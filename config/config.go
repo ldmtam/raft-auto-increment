@@ -8,12 +8,7 @@ type Config struct {
 	RaftDir   string
 	Bootstrap bool
 
-	DataDir  string
 	NodeAddr string
 
 	Storage string
 }
-
-const (
-	DB_FILE_NAME = "data.db"
-)

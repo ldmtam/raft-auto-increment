@@ -21,8 +21,7 @@ run1:
 		--node-addr localhost:3000 \
 		--raft-addr localhost:5000 \
 		--raft-dir ./tmp/node1/raft \
-		--data-dir ./tmp/node1/data \
-		--storage memory \
+		--storage boltdb \
 		--bootstrap true
 
 run2:
@@ -32,8 +31,7 @@ run2:
 		--raft-addr localhost:15000 \
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node2/raft \
-		--data-dir ./tmp/node2/data \
-		--storage memory
+		--storage boltdb
 
 run3:
 	go run main.go \
@@ -42,5 +40,4 @@ run3:
 		--raft-addr localhost:25000 \
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node3/raft \
-		--data-dir ./tmp/node3/data \
-		--storage memory
+		--storage boltdb
