@@ -3,8 +3,8 @@ package common
 import "errors"
 
 const (
-	BADGER_STORAGE = "badger"
-	BOLT_STORAGE   = "bolt"
+	BADGER_STORAGE = "badgerdb"
+	BOLT_STORAGE   = "boltdb"
 )
 
 var (

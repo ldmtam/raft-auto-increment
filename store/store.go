@@ -10,10 +10,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ldmtam/raft-auto-increment/common"
+
 	"github.com/ldmtam/raft-auto-increment/database/memdb"
 
 	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
 
+	raftbadgerdb "github.com/BBVA/raft-badger"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/ldmtam/raft-auto-increment/config"
@@ -254,17 +257,37 @@ func (s *Store) setupRaft() error {
 		return err
 	}
 
-	store, err := raftboltdb.NewBoltStore(filepath.Join(s.config.RaftDir, "raft.db"))
-	if err != nil {
-		return err
-	}
+	var stableStore raft.StableStore
+	var logStore raft.LogStore
 
-	logStore, err := raft.NewLogCache(logCacheCapacity, store)
-	if err != nil {
-		return err
-	}
+	switch s.config.Storage {
+	case common.BADGER_STORAGE:
+		store, err := raftbadgerdb.NewBadgerStore(s.config.RaftDir)
+		if err != nil {
+			return err
+		}
 
-	stableStore := store
+		logStore, err = raft.NewLogCache(logCacheCapacity, store)
+		if err != nil {
+			return err
+		}
+
+		stableStore = store
+	case common.BOLT_STORAGE:
+		store, err := raftboltdb.NewBoltStore(filepath.Join(s.config.RaftDir, "raft.db"))
+		if err != nil {
+			return err
+		}
+
+		logStore, err = raft.NewLogCache(logCacheCapacity, store)
+		if err != nil {
+			return err
+		}
+
+		stableStore = store
+	default:
+		return common.ErrStorageNotAvailable
+	}
 
 	snapshotStore, err := raft.NewFileSnapshotStore(s.config.RaftDir, retainSnapshotCount, os.Stderr)
 	if err != nil {
