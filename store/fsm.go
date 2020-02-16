@@ -92,16 +92,12 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
-	fmt.Println("Starting snapshot")
-	var err error
-	snapshot := &fsmSnapshot{}
-
-	snapshot.data, err = f.db.Backup()
+	data, err := f.db.Backup()
 	if err != nil {
 		return nil, err
 	}
 
-	return snapshot, nil
+	return &fsmSnapshot{data: data}, nil
 }
 
 func (f *fsm) Restore(rc io.ReadCloser) error {
@@ -127,24 +123,31 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 }
 
 func (snapshot *fsmSnapshot) Persist(sink raft.SnapshotSink) error {
-	if err := func() error {
-		size := uint64(len(snapshot.data))
+	var err error
 
-		// write size of database first
-		if _, err := sink.Write(common.Uint64ToByte(size)); err != nil {
-			return err
+	defer func() {
+		if err == nil {
+			sink.Close()
+		} else {
+			sink.Cancel()
 		}
+	}()
 
-		// then, write the actual data.
-		if _, err := sink.Write(snapshot.data); err != nil {
-			return err
-		}
-		return nil
-	}; err != nil {
-		return sink.Cancel()
+	size := uint64(len(snapshot.data))
+
+	// write size of database first
+	_, err = sink.Write(common.Uint64ToByte(size))
+	if err != nil {
+		return err
 	}
 
-	return sink.Close()
+	// then, write the actual data.
+	_, err = sink.Write(snapshot.data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (snapshot *fsmSnapshot) Release() {}
