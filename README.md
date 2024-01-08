@@ -1,19 +1,23 @@
 # Raft Auto Increment
-Distributed, fault-tolerant, persistent, auto-increment ID generation service with Raft consensus. <br/>
+Distributed, fault-tolerant, persistent, auto-increment ID generation service with Raft consensus.
 
-Support both REST API and gRPC. <br/>
+Support both REST API and gRPC.
 
-Multiple storage engines are supported: `boltdb`, `badgerdb`. Please consider using `badgerdb` for better performance.
 # What is Raft consensus?
 Please refer to this [page](https://raft.github.io/) for more detail.
 
 # How to run
 Clone the project:
 ```
-go get github.com/ldmtam/raft-auto-increment
+git clone https://github.com/ldmtam/raft-auto-increment
 ```
 
-Change directory to `raft-auto-increment`, create `tmp` folder and `node1`, `node2`, `node3` folder inside `tmp`.
+Change directory to `raft-auto-increment`, create `tmp` folder and `node1`, `node2`, `node3` with following structure
+```
+tmp/node1
+tmp/node2
+tmp/node3
+```
 
 Start `node 1`, this node will be the leader by default. `node 1` will serve requests at port `3000`.
 ```
