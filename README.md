@@ -1,9 +1,9 @@
 # Raft Auto Increment
 Distributed, fault-tolerant, persistent, auto-increment ID generation service with Raft consensus.
 
-Support both `REST API` and `gRPC` protocol.
+Support both `REST API` and `gRPC`` protocol.
 
-Support different storage databases for Raft log: `Bitcask` and `Badger`
+Support different storage for Raft log: `Bitcask` and `Badger` via `--storage` flag
 
 # What is Raft consensus?
 Please refer to this [page](https://raft.github.io/) for more detail.

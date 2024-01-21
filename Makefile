@@ -31,7 +31,7 @@ run2:
 		--raft-addr localhost:15000 \
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node2/raft \
-		--storage bitcask
+		--storage badger
 
 run3:
 	go run main.go \
