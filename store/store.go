@@ -22,6 +22,7 @@ import (
 	"github.com/ldmtam/raft-auto-increment/config"
 	"github.com/ldmtam/raft-auto-increment/database"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -276,7 +277,7 @@ func (s *Store) setupRaft() error {
 	case common.BITCASK_STORAGE:
 		store, err := raftbitcask.New(
 			gobitcask.WithDirName(s.config.RaftDir),
-			gobitcask.WithSegmentSize(256*1024*1024), // 128MB segment size
+			gobitcask.WithSegmentSize(256*1024*1024), // 256MB segment size
 			gobitcask.WithMergeOpt(&gobitcask.MergeOption{
 				MinFiles: 5,
 				Interval: 6 * time.Hour,
@@ -357,7 +358,10 @@ func (s *Store) monitorLeadership() {
 }
 
 func (s *Store) joinCluster() error {
-	conn, err := grpc.Dial(s.config.JoinAddr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(
+		s.config.JoinAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock())
 	if err != nil {
 		return err
 	}
@@ -379,7 +383,10 @@ func (s *Store) forwardJoinRequest(raftID, raftAddr string) error {
 	var err error
 
 	if s.leaderConn == nil {
-		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		s.leaderConn, err = grpc.Dial(
+			s.leader.NodeAddr,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock())
 		if err != nil {
 			return err
 		}
@@ -401,7 +408,10 @@ func (s *Store) forwardGetOneRequest(key string) (uint64, error) {
 	var err error
 
 	if s.leaderConn == nil {
-		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		s.leaderConn, err = grpc.Dial(
+			s.leader.NodeAddr,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock())
 		if err != nil {
 			return 0, err
 		}
@@ -421,7 +431,10 @@ func (s *Store) forwardGetManyRequest(key string, quantity uint64) (uint64, uint
 	var err error
 
 	if s.leaderConn == nil {
-		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		s.leaderConn, err = grpc.Dial(
+			s.leader.NodeAddr,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock())
 		if err != nil {
 			return 0, 0, err
 		}
@@ -444,7 +457,10 @@ func (s *Store) forwardGetLastInsertedRequest(key string) (uint64, error) {
 	var err error
 
 	if s.leaderConn == nil {
-		s.leaderConn, err = grpc.Dial(s.leader.NodeAddr, grpc.WithInsecure(), grpc.WithBlock())
+		s.leaderConn, err = grpc.Dial(
+			s.leader.NodeAddr,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock())
 		if err != nil {
 			return 0, err
 		}
