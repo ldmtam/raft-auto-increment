@@ -21,7 +21,7 @@ run1:
 		--node-addr localhost:3000 \
 		--raft-addr localhost:5000 \
 		--raft-dir ./tmp/node1/raft \
-		--storage badgerdb \
+		--storage bitcask \
 		--bootstrap true
 
 run2:
@@ -31,7 +31,7 @@ run2:
 		--raft-addr localhost:15000 \
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node2/raft \
-		--storage badgerdb
+		--storage bitcask
 
 run3:
 	go run main.go \
@@ -40,4 +40,4 @@ run3:
 		--raft-addr localhost:25000 \
 		--join-addr localhost:3000 \
 		--raft-dir ./tmp/node3/raft \
-		--storage badgerdb
+		--storage bitcask

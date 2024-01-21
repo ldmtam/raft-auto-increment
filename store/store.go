@@ -6,11 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
+	gobitcask "github.com/ldmtam/go-bitcask"
 	"github.com/ldmtam/raft-auto-increment/common"
+	raftbitcask "github.com/ldmtam/raft-bitcask"
 
 	"github.com/ldmtam/raft-auto-increment/database/memdb"
 
@@ -18,7 +19,6 @@ import (
 
 	raftbadgerdb "github.com/BBVA/raft-badger"
 	"github.com/hashicorp/raft"
-	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/ldmtam/raft-auto-increment/config"
 	"github.com/ldmtam/raft-auto-increment/database"
 	"google.golang.org/grpc"
@@ -273,8 +273,15 @@ func (s *Store) setupRaft() error {
 		}
 
 		stableStore = store
-	case common.BOLT_STORAGE:
-		store, err := raftboltdb.NewBoltStore(filepath.Join(s.config.RaftDir, "raft.db"))
+	case common.BITCASK_STORAGE:
+		store, err := raftbitcask.New(
+			gobitcask.WithDirName(s.config.RaftDir),
+			gobitcask.WithSegmentSize(256*1024*1024), // 128MB segment size
+			gobitcask.WithMergeOpt(&gobitcask.MergeOption{
+				MinFiles: 5,
+				Interval: 6 * time.Hour,
+			}),
+		)
 		if err != nil {
 			return err
 		}
