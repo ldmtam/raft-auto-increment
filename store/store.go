@@ -15,7 +15,7 @@ import (
 
 	"github.com/ldmtam/raft-auto-increment/database/memdb"
 
-	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
+	pb "github.com/ldmtam/raft-auto-increment/pb"
 
 	raftbadgerdb "github.com/BBVA/raft-badger"
 	"github.com/hashicorp/raft"
@@ -363,7 +363,7 @@ func (s *Store) joinCluster() error {
 	}
 	defer conn.Close()
 
-	client := pb.NewAutoIncrementClient(conn)
+	client := pb.NewAutoIncrementServiceClient(conn)
 
 	if _, err := client.Join(context.Background(), &pb.JoinRequest{
 		RaftID:      s.config.RaftID,
@@ -385,7 +385,7 @@ func (s *Store) forwardJoinRequest(raftID, raftAddr string) error {
 		}
 	}
 
-	client := pb.NewAutoIncrementClient(s.leaderConn)
+	client := pb.NewAutoIncrementServiceClient(s.leaderConn)
 
 	if _, err := client.Join(context.Background(), &pb.JoinRequest{
 		RaftID:      raftID,
@@ -407,7 +407,7 @@ func (s *Store) forwardGetOneRequest(key string) (uint64, error) {
 		}
 	}
 
-	client := pb.NewAutoIncrementClient(s.leaderConn)
+	client := pb.NewAutoIncrementServiceClient(s.leaderConn)
 
 	resp, err := client.GetOne(context.Background(), &pb.GetOneRequest{Key: key})
 	if err != nil {
@@ -427,7 +427,7 @@ func (s *Store) forwardGetManyRequest(key string, quantity uint64) (uint64, uint
 		}
 	}
 
-	client := pb.NewAutoIncrementClient(s.leaderConn)
+	client := pb.NewAutoIncrementServiceClient(s.leaderConn)
 
 	resp, err := client.GetMany(context.Background(), &pb.GetManyRequest{
 		Key:      key,
@@ -450,7 +450,7 @@ func (s *Store) forwardGetLastInsertedRequest(key string) (uint64, error) {
 		}
 	}
 
-	client := pb.NewAutoIncrementClient(s.leaderConn)
+	client := pb.NewAutoIncrementServiceClient(s.leaderConn)
 
 	resp, err := client.GetLastInserted(context.Background(), &pb.GetLastInsertedRequest{Key: key})
 	if err != nil {

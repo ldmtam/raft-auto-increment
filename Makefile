@@ -4,16 +4,10 @@ clean:
 	rm -f $(BIN)
 
 build: clean
-	GOARCH=amd64 go build -o $(BIN)
+	CGO_ENABLE=0 go build -o $(BIN)
 
 genpb:
-	protoc --proto_path=idl \
-		-I/usr/local/include \
-		-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		-I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway \
-		--go_out=plugins=grpc:./auto_increment/pb \
-		--grpc-gateway_out=logtostderr=true:./auto_increment/pb \
-		idl/auto_increment.proto
+	buf generate
 
 run1:
 	go run main.go \

@@ -12,11 +12,12 @@ import (
 
 	"github.com/ldmtam/raft-auto-increment/config"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/ldmtam/raft-auto-increment/auto_increment/pb"
+	pb "github.com/ldmtam/raft-auto-increment/pb"
 )
 
 // Store represents the store interface
@@ -69,11 +70,13 @@ func New(config *config.Config) (*AutoIncrement, error) {
 	httpListener := m.Match(cmux.HTTP1Fast())
 
 	ai.grpcServer = grpc.NewServer()
-	pb.RegisterAutoIncrementServer(ai.grpcServer, ai)
+	pb.RegisterAutoIncrementServiceServer(ai.grpcServer, ai)
 
 	mux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-	if err := pb.RegisterAutoIncrementHandlerFromEndpoint(context.Background(), mux, ai.config.NodeAddr, opts); err != nil {
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
+	if err := pb.RegisterAutoIncrementServiceHandlerFromEndpoint(context.Background(), mux, ai.config.NodeAddr, opts); err != nil {
 		return nil, err
 	}
 
