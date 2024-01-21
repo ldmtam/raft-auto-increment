@@ -1,7 +1,9 @@
 # Raft Auto Increment
 Distributed, fault-tolerant, persistent, auto-increment ID generation service with Raft consensus.
 
-Support both REST API and gRPC.
+Support both `REST API` and `gRPC` protocol.
+
+Support different storage databases for Raft log: `Bitcask` and `Badger`
 
 # What is Raft consensus?
 Please refer to this [page](https://raft.github.io/) for more detail.
@@ -12,11 +14,9 @@ Clone the project:
 git clone https://github.com/ldmtam/raft-auto-increment
 ```
 
-Change directory to `raft-auto-increment`, create `tmp` folder and `node1`, `node2`, `node3` with following structure
+Change directory to `raft-auto-increment`
 ```
-tmp/node1
-tmp/node2
-tmp/node3
+cd raft-auto-increment
 ```
 
 Start `node 1`, this node will be the leader by default. `node 1` will serve requests at port `3000`.
@@ -52,5 +52,4 @@ curl http://localhost:13000/auto-increment/one/bar
 
 ```
 curl http://localhost:23000/auto-increment/last-inserted/bar
-
 ```
